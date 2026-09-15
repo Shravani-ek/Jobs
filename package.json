@@ -1,0 +1,12 @@
+{
+  "name": "jobs-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix job-search-ui run dev",
+    "build": "npm --prefix job-search-ui run build",
+    "preview": "npm --prefix job-search-ui run preview"
+  },
+  "dependencies": {
+    "lucide-vue-next": "^1.0.0"
+  }
+}
