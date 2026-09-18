@@ -75,27 +75,22 @@ const steps = [
   {
     number: 1,
     title: "Company Profile",
-    description: "Basic company information",
   },
   {
     number: 2,
     title: "Contact & Location",
-    description: "Address and contact details",
   },
   {
     number: 3,
     title: "Legal & Tax",
-    description: "Legal and tax information",
   },
   {
     number: 4,
     title: "Branding & Bio",
-    description: "Company bio and branding",
   },
   {
     number: 5,
     title: "Review & Submit",
-    description: "Review and publish profile",
   },
 ];
 
@@ -106,7 +101,11 @@ const currentStep = ref(1);
 ----------------------------- */
 
 function goBack() {
-  router.push("/");
+  if (currentStep.value > 1) {
+    currentStep.value--;
+  } else {
+    router.push("/");
+  }
 }
 
 function continueStep() {
@@ -142,86 +141,76 @@ function saveAndExit() {
       ====================================== -->
 
       <section
-        class="mt-3 rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm"
+        class="mt-3 rounded-lg border border-slate-200 bg-white px-4 py-2.5 shadow-sm"
       >
-
-        <button
-          @click="goBack"
-          class="mb-3 inline-flex items-center gap-2 text-sm font-medium text-slate-700 transition hover:text-[#4F46E5]"
-        >
-          <ArrowLeft class="h-4 w-4" />
-          Back to Employer Hub
-        </button>
-
-        <div class="flex items-center justify-between">
-
-          <template
-            v-for="(step, index) in steps"
-            :key="step.number"
+        <div class="flex items-center gap-4 lg:gap-6">
+          <button
+            @click="goBack"
+            class="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-slate-700 transition hover:text-[#4F46E5]"
           >
+            <ArrowLeft class="h-4 w-4" />
+            <span>Back</span>
+          </button>
 
-            <div class="flex items-center gap-3">
+          <div class="h-6 w-px shrink-0 bg-slate-200" />
 
-              <!-- Number -->
-              <div
-                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border"
-                :class="
-                  currentStep === step.number
-                    ? 'border-[#4F46E5] bg-[#4F46E5] text-white'
-                    : currentStep > step.number
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
-                      : 'border-slate-300 bg-white text-slate-700'
-                "
-              >
-                <span class="text-sm font-semibold">
-                  {{ step.number }}
-                </span>
-              </div>
-
-              <!-- Text -->
-              <div class="hidden lg:block">
-
-                <p
-                  class="text-xs font-semibold"
+          <div class="flex flex-1 items-center justify-between gap-3 overflow-x-auto">
+            <template
+              v-for="(step, index) in steps"
+              :key="step.number"
+            >
+              <div class="flex items-center gap-3">
+                <!-- Number -->
+                <div
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border"
                   :class="
                     currentStep === step.number
-                      ? 'text-[#4F46E5]'
-                      : 'text-slate-700'
+                      ? 'border-[#4F46E5] bg-[#4F46E5] text-white'
+                      : currentStep > step.number
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
+                        : 'border-slate-300 bg-white text-slate-700'
                   "
                 >
-                  {{ step.title }}
-                </p>
+                  <span class="text-sm font-semibold">
+                    {{ step.number }}
+                  </span>
+                </div>
 
-                <p class="mt-0.5 text-xs text-slate-500">
-                  {{ step.description }}
-                </p>
-
+                <!-- Text -->
+                <div class="hidden lg:block">
+                  <p
+                    class="text-xs font-semibold"
+                    :class="
+                      currentStep === step.number
+                        ? 'text-[#4F46E5]'
+                        : 'text-slate-700'
+                    "
+                  >
+                    {{ step.title }}
+                  </p>
+                </div>
               </div>
 
-            </div>
-
-            <!-- Arrow -->
-            <ArrowRight
-              v-if="index < steps.length - 1"
-              class="h-5 w-5 shrink-0 text-slate-400"
-            />
-
-          </template>
-
+              <!-- Arrow -->
+              <ArrowRight
+                v-if="index < steps.length - 1"
+                class="h-5 w-5 shrink-0 text-slate-400"
+              />
+            </template>
+          </div>
         </div>
-
       </section>
 
-      <div class="mt-3 min-h-0 flex-1">
+      <div class="mt-3 min-h-0 flex-1 overflow-hidden">
 
-      <div v-if="currentStep === 1" class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,2.2fr)_minmax(320px,1fr)]">
+      <div v-if="currentStep === 1" class="grid h-full min-h-0 grid-cols-1 gap-4 xl:grid-cols-[minmax(0,2.2fr)_minmax(320px,1fr)]">
 
         <!-- =====================================
              LEFT FORM
         ====================================== -->
 
         <section
-          class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+          class="custom-scroll h-full min-h-0 overflow-y-auto rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
         >
 
           <!-- Section heading -->
@@ -420,15 +409,16 @@ function saveAndExit() {
         <!-- =====================================
              RIGHT LIVE PREVIEW
         ====================================== -->
-<CompanyPreview
-  :company-name="companyForm.brandName || companyForm.legalName"
-  :industry="companyForm.industry"
-  :legal-info="companyForm.legalName"
-  :company-size="companyForm.companySize"
-  :organization-type="companyForm.organizationType"
-  :founded-year="companyForm.foundedYear"
-  class="space-y-4"
-/> 
+        <aside class="custom-scroll h-full min-h-0 min-w-0 overflow-y-auto pr-1">
+          <CompanyPreview
+            :company-name="companyForm.brandName || companyForm.legalName"
+            :industry="companyForm.industry"
+            :legal-info="companyForm.legalName"
+            :company-size="companyForm.companySize"
+            :organization-type="companyForm.organizationType"
+            :founded-year="companyForm.foundedYear"
+          />
+        </aside> 
 
 <div v-if="false" class="space-y-4">
 

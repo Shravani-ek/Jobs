@@ -135,7 +135,7 @@ const logoPreview = computed(() => {
       ====================================================== -->
 
       <section
-        class="branding-bio-scroll min-h-0 overflow-y-auto rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+        class="branding-bio-scroll h-full min-h-0 overflow-y-auto rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
       >
 
         <!-- HEADER -->
@@ -366,7 +366,7 @@ const logoPreview = computed(() => {
            RIGHT : LIVE CARD PREVIEW
       ====================================================== -->
 
-      <aside class="min-h-0 min-w-0 overflow-hidden space-y-4">
+      <aside class="branding-bio-scroll h-full min-h-0 min-w-0 overflow-y-auto space-y-4 pr-1">
         <CompanyPreview
           :company-name="companyName"
           :industry="industry"

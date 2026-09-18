@@ -223,15 +223,15 @@ function handleBack() {
   <div class="h-full min-h-0 w-full flex-1 overflow-hidden bg-slate-50">
 
     <div
-      class="grid h-full w-full grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_380px]"
+      class="grid h-full min-h-0 w-full grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_380px]"
     >
 
       <!-- =====================================
            LEFT FORM
-      ====================================== -->
+        ====================================== -->
 
       <div
-        class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+        class="custom-scroll h-full min-h-0 overflow-y-auto rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
       >
 
         <!-- HEADER -->
@@ -446,7 +446,7 @@ function handleBack() {
            RIGHT SIDEBAR
       ====================================== -->
 
-      <div class="space-y-4">
+      <aside class="custom-scroll h-full min-h-0 min-w-0 overflow-y-auto pr-1">
         <CompanyPreview
           :company-name="previewCompany[0].value"
           :industry="previewCompany[1].value"
@@ -637,7 +637,7 @@ function handleBack() {
         </div>
 
         </div>
-      </div>
+      </aside>
 
     </div>
 

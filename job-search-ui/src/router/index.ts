@@ -26,6 +26,12 @@ const routes = [
     props: { initialTab: 'Create Job' },
   },
   {
+    path: '/manage-profile',
+    name: 'manage-profile',
+    component: CompanyDashboard,
+    props: { initialTab: 'Manage Profile' },
+  },
+  {
     path: '/settings',
     name: 'settings',
     component: JobSearch,
