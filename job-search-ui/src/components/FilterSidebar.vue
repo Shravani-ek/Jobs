@@ -1,1192 +1,1876 @@
 <script setup lang="ts">
+import { ref, computed } from "vue";
 import {
-  ChevronDown,
-  MapPin,
   SlidersHorizontal,
-  Navigation,
-  BriefcaseBusiness,
+  MapPin,
+  ChevronDown,
+  Search,
+  Briefcase,
   GraduationCap,
+  Award,
+  Laptop,
+  Globe,
+  Landmark,
+  Map,
   Building2,
-  Layers3,
-  BookOpen,
-  UserRound,
-  Clock3,
-  UsersRound,
+  Navigation,
+  IndianRupee,
+  Factory,
+  Clock,
+  Zap,
 } from "lucide-vue-next";
-import { ref } from "vue";
 
-const props = defineProps<{
-  mode?: "job" | "internship";
+const emit = defineEmits<{
+  (e: "apply", filters: any): void;
+  (e: "clear"): void;
 }>();
 
-/* -----------------------------
-   FILTER STATE
------------------------------ */
+/* =========================
+   DROPDOWN STATES
+========================= */
 
-const salary = ref(300);
+const openSection = ref<string | null>(null);
+const openLocationSub = ref<string | null>(null);
 
-const openSections = ref<Record<string, boolean>>({
-  location: true,
-  jobType: false,
-  experience: false,
-  department: false,
-  companyType: false,
-  roleCategory: false,
-  education: false,
-  postedBy: false,
-  industry: false,
-  freshness: false,
-  applicants: false,
-  workMode: false,
-});
+const openDropdown = (section: string) => {
+  if (openSection.value === section) {
+    openSection.value = null;
+    openLocationSub.value = null;
+  } else {
+    openSection.value = section;
+    openLocationSub.value = null;
+  }
+};
 
-/* -----------------------------
-   LOCATION
------------------------------ */
+const toggleLocationSub = (sub: string) => {
+  openLocationSub.value = openLocationSub.value === sub ? null : sub;
+};
 
-const locality = ref("");
+/* =========================
+   FILTER VALUES
+========================= */
 
+const selectedJobType = ref("");
+const selectedExperience = ref("");
+const selectedWorkMode = ref("");
+
+// Location
 const selectedCountry = ref("");
 const selectedState = ref("");
 const selectedDistrict = ref("");
 const selectedCity = ref("");
+const locationSearch = ref("");
+
+// Education
+const selectedEducationLevel = ref("");
+const selectedStream = ref("");
+const selectedDiploma = ref("");
+const selectedDegree = ref("");
+const selectedSpecialization = ref("");
+const selectedPhdField = ref("");
+
+// Salary
+const selectedMinSalary = ref("");
+const selectedMaxSalary = ref("");
+
+// Industry, Shift, Urgency
+const selectedIndustry = ref("");
+const selectedShift = ref("");
+const selectedUrgency = ref("");
+
+/* =========================
+   OPTIONS
+========================= */
+
+const jobTypes = [
+  "Full-Time",
+  "Part-Time",
+  "Internship",
+  "Contract",
+];
+
+const experienceLevels = [
+  "Fresher",
+  "Entry Level",
+  "Intermediate",
+  "Experienced",
+];
+
+const workModes = [
+  "On-site",
+  "Remote",
+  "Hybrid",
+];
 
 const countries = [
   "India",
   "United States",
   "United Kingdom",
   "Canada",
-  "Australia",
 ];
 
 const states = [
   "Maharashtra",
-  "Delhi",
   "Karnataka",
-  "Telangana",
+  "Delhi",
+  "Tamil Nadu",
   "Gujarat",
 ];
 
 const districts = [
-  "Nagpur",
   "Pune",
+  "Nagpur",
   "Mumbai",
   "Chandrapur",
   "Nashik",
 ];
 
 const cities = [
-  "Nagpur",
   "Pune",
+  "Nagpur",
   "Mumbai",
   "Bangalore",
-  "Hyderabad",
+  "Delhi",
 ];
 
-/* -----------------------------
-   OTHER FILTER OPTIONS
------------------------------ */
+const filteredCountries = computed(() => {
+  if (!locationSearch.value.trim()) return countries;
+  const q = locationSearch.value.toLowerCase().trim();
+  return countries.filter((c) => c.toLowerCase().includes(q));
+});
 
-const jobTypes = [
-  "Hybrid",
-  "Remote",
-  "Full-Time",
-  "Part-Time",
-];
+const filteredStates = computed(() => {
+  if (!locationSearch.value.trim()) return states;
+  const q = locationSearch.value.toLowerCase().trim();
+  return states.filter((s) => s.toLowerCase().includes(q));
+});
 
-const experience = [
-  "Entry Level",
-  "Intermediate",
-  "Expert",
-];
+const filteredDistricts = computed(() => {
+  if (!locationSearch.value.trim()) return districts;
+  const q = locationSearch.value.toLowerCase().trim();
+  return districts.filter((d) => d.toLowerCase().includes(q));
+});
 
-const departments = [
-  "Engineering",
-  "Design",
-  "Marketing",
-  "Sales",
-];
+const filteredCities = computed(() => {
+  if (!locationSearch.value.trim()) return cities;
+  const q = locationSearch.value.toLowerCase().trim();
+  return cities.filter((c) => c.toLowerCase().includes(q));
+});
 
-const companyTypes = [
-  "Startup",
-  "Enterprise",
-  "Agency",
-  "Remote First",
-];
+const locationDisplay = computed(() => {
+  const parts = [selectedCity.value, selectedState.value, selectedCountry.value].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : "Select location";
+});
 
-const roleCategories = [
-  "Developer",
-  "Manager",
-  "Analyst",
-  "Designer",
-];
-
-const educations = [
-  "Bachelor",
-  "Master",
-  "PhD",
+// Education Levels
+const educationLevels = [
+  "Below 10th",
+  "10th / SSC",
+  "12th / HSC",
   "Diploma",
+  "Bachelor's Degree",
+  "Master's Degree",
+  "PhD / Doctorate",
 ];
 
-const postedBy = [
-  "Recruiter",
-  "Company",
-  "Agency",
+// 12th Streams
+const streams = [
+  "Science",
+  "Commerce",
+  "Arts / Humanities",
+  "Vocational",
+  "Other",
 ];
 
-const industries = [
-  "IT Services",
-  "Fintech",
-  "Healthcare",
-  "E-commerce",
+// Diploma Options
+const diplomaOptions = [
+  "Mechanical Engineering",
+  "Civil Engineering",
+  "Electrical & Electronics",
+  "Computer Engineering / IT",
+  "Electronics & Communication",
+  "Chemical Engineering",
+  "Automobile Engineering",
+  "Graphic Design & Animation",
+  "Digital Marketing",
+  "Hotel Management",
+  "Pharmacy (D.Pharm)",
+  "Other",
 ];
 
-const freshness = [
-  "Any Time",
-  "Last 24 Hours",
-  "Last 7 Days",
-  "Last 30 Days",
+// Bachelor's Degrees
+const bachelorDegrees = [
+  "BCA",
+  "B.Tech / BE",
+  "B.Sc",
+  "B.Com",
+  "BBA",
+  "BA",
+  "B.Pharm",
+  "LLB",
+  "Other",
 ];
 
-const applicants = [
-  "Less than 10",
-  "10 to 50",
-  "50 to 100",
+// Master's Degrees
+const masterDegrees = [
+  "MCA",
+  "M.Tech",
+  "M.Sc",
+  "M.Com",
+  "MBA",
+  "MA",
+  "M.Pharm",
+  "LLM",
+  "Other",
 ];
 
-/* -----------------------------
-   TOGGLE SECTION
------------------------------ */
+// Degree Specializations
+const degreeSpecializations: Record<string, string[]> = {
+  BCA: [
+    "Computer Applications",
+    "Cloud Computing & Security",
+    "Data Science",
+    "Web & Full Stack Development",
+    "Software Engineering",
+    "Other",
+  ],
+  "B.Tech / BE": [
+    "Computer Science & Engineering (CSE)",
+    "Information Technology (IT)",
+    "Artificial Intelligence & ML",
+    "Data Science",
+    "Electronics & Communication (ECE)",
+    "Mechanical Engineering",
+    "Civil Engineering",
+    "Electrical & Electronics (EEE)",
+    "Chemical Engineering",
+    "Other",
+  ],
+  "B.Sc": [
+    "Computer Science",
+    "Information Technology",
+    "Mathematics",
+    "Physics",
+    "Chemistry",
+    "Biotechnology",
+    "Statistics",
+    "Electronics",
+    "Other",
+  ],
+  "B.Com": [
+    "Accounting & Finance",
+    "Banking & Insurance",
+    "Financial Markets",
+    "Taxation",
+    "Computer Applications",
+    "General",
+    "Other",
+  ],
+  BBA: [
+    "Marketing",
+    "Finance",
+    "Human Resources (HR)",
+    "Operations & Supply Chain",
+    "Business Analytics",
+    "International Business",
+    "Other",
+  ],
+  BA: [
+    "English Literature",
+    "Economics",
+    "Psychology",
+    "Political Science",
+    "Sociology",
+    "Journalism & Mass Comm",
+    "History",
+    "Other",
+  ],
+  "B.Pharm": [
+    "General Pharmacy",
+    "Pharmaceutical Chemistry",
+    "Pharmacology",
+    "Pharmaceutics",
+    "Other",
+  ],
+  LLB: [
+    "Corporate Law",
+    "Criminal Law",
+    "Civil Law",
+    "Constitutional Law",
+    "Intellectual Property Rights",
+    "Cyber Law",
+    "Other",
+  ],
+  MCA: [
+    "Computer Applications",
+    "Software Development",
+    "Artificial Intelligence & Data Science",
+    "Cloud & DevOps",
+    "Cyber Security",
+    "Other",
+  ],
+  "M.Tech": [
+    "Computer Science & Engineering",
+    "Software Engineering",
+    "VLSI & Embedded Systems",
+    "Data Science & AI",
+    "Thermal & Mechanical Systems",
+    "Structural Engineering",
+    "Other",
+  ],
+  "M.Sc": [
+    "Computer Science",
+    "Data Science",
+    "Information Technology",
+    "Biotechnology",
+    "Physics",
+    "Chemistry",
+    "Mathematics",
+    "Other",
+  ],
+  "M.Com": [
+    "Advanced Accounting",
+    "Banking & Financial Services",
+    "Taxation & Auditing",
+    "Business Management",
+    "Other",
+  ],
+  MBA: [
+    "Finance",
+    "Marketing",
+    "Human Resources (HR)",
+    "Operations & Logistics",
+    "Business Analytics",
+    "Information Technology (IT)",
+    "International Business",
+    "Other",
+  ],
+  MA: [
+    "English",
+    "Economics",
+    "Psychology",
+    "Public Administration",
+    "Sociology",
+    "Journalism & Mass Comm",
+    "Other",
+  ],
+  "M.Pharm": [
+    "Pharmaceutics",
+    "Pharmacology",
+    "Pharmaceutical Analysis",
+    "Pharmaceutical Chemistry",
+    "Other",
+  ],
+  LLM: [
+    "Corporate & Commercial Law",
+    "Criminal Law",
+    "Constitutional Law",
+    "IPR & Technology Law",
+    "International Trade Law",
+    "Other",
+  ],
+};
 
-function toggleSection(section: string) {
-  openSections.value[section] =
-    !openSections.value[section];
-}
+const defaultSpecializations = [
+  "Computer Science / IT",
+  "Data Science & AI",
+  "Finance & Accounting",
+  "Marketing & Sales",
+  "Human Resources",
+  "Operations Management",
+  "General / Other",
+];
 
-/* -----------------------------
-   CURRENT LOCATION
------------------------------ */
+const currentDegreeOptions = computed(() => {
+  if (selectedEducationLevel.value === "Bachelor's Degree") {
+    return bachelorDegrees;
+  }
+  if (selectedEducationLevel.value === "Master's Degree") {
+    return masterDegrees;
+  }
+  return [];
+});
 
-function useCurrentLocation() {
-  locality.value = "Current Location";
-}
+const currentSpecializationOptions = computed(() => {
+  if (selectedDegree.value && degreeSpecializations[selectedDegree.value]) {
+    return degreeSpecializations[selectedDegree.value];
+  }
+  return defaultSpecializations;
+});
 
-/* -----------------------------
-   CLEAR FILTERS
------------------------------ */
+// PhD Fields
+const phdFields = [
+  "Computer Science & Engineering",
+  "Artificial Intelligence & Robotics",
+  "Data Science & Analytics",
+  "Electrical & Electronics",
+  "Mechanical & Manufacturing",
+  "Management & Business Studies",
+  "Economics & Commerce",
+  "Biological & Life Sciences",
+  "Physical Sciences",
+  "Humanities & Social Sciences",
+  "Other",
+];
 
-function clearAll() {
-  salary.value = 300;
+// Salary Options (in LPA)
+const minSalaryOptions = [
+  "₹3 LPA",
+  "₹6 LPA",
+  "₹10 LPA",
+  "₹15 LPA",
+  "₹20 LPA",
+  "₹25 LPA",
+  "₹35 LPA",
+  "₹50 LPA",
+];
 
-  locality.value = "";
+const maxSalaryOptions = [
+  "₹6 LPA",
+  "₹10 LPA",
+  "₹15 LPA",
+  "₹20 LPA",
+  "₹25 LPA",
+  "₹35 LPA",
+  "₹50 LPA",
+  "₹75+ LPA",
+];
+
+// Industry Options
+const industryOptions = [
+  "IT Services & Software",
+  "Banking & Financial (BFSI)",
+  "E-Commerce & Retail",
+  "Healthcare & Life Sciences",
+  "Manufacturing & Automotive",
+  "Education & EdTech",
+  "Media & Entertainment",
+  "Consulting & Professional Services",
+  "Telecommunications",
+  "Hospitality & Travel",
+  "Other",
+];
+
+// Shift Options
+const shiftOptions = [
+  "Day Shift",
+  "Night Shift",
+  "Rotational Shift",
+  "Flexible Timing",
+  "Morning Shift",
+  "Evening Shift",
+];
+
+// Hiring Urgency Options
+const urgencyOptions = [
+  "Urgently Hiring (Immediate)",
+  "Joining in 15 Days",
+  "Joining in 30 Days",
+  "Within 60 Days",
+  "Flexible / Standard",
+];
+
+/* =========================
+   SELECT HANDLERS
+========================= */
+
+const selectCountry = (c: string) => {
+  selectedCountry.value = selectedCountry.value === c ? "" : c;
+  openLocationSub.value = null;
+};
+
+const selectState = (s: string) => {
+  selectedState.value = selectedState.value === s ? "" : s;
+  openLocationSub.value = null;
+};
+
+const selectDistrict = (d: string) => {
+  selectedDistrict.value = selectedDistrict.value === d ? "" : d;
+  openLocationSub.value = null;
+};
+
+const selectCity = (c: string) => {
+  selectedCity.value = selectedCity.value === c ? "" : c;
+  openLocationSub.value = null;
+};
+
+const useCurrentLocation = () => {
+  selectedCountry.value = "India";
+  selectedState.value = "Maharashtra";
+  selectedDistrict.value = "Pune";
+  selectedCity.value = "Pune";
+  openLocationSub.value = null;
+};
+
+const selectJobType = (value: string) => {
+  selectedJobType.value = value;
+  openSection.value = null;
+};
+
+const selectExperience = (value: string) => {
+  selectedExperience.value = value;
+  openSection.value = null;
+};
+
+const selectWorkMode = (value: string) => {
+  selectedWorkMode.value = value;
+  openSection.value = null;
+};
+
+const selectEducationLevel = (level: string) => {
+  if (selectedEducationLevel.value !== level) {
+    selectedStream.value = "";
+    selectedDiploma.value = "";
+    selectedDegree.value = "";
+    selectedSpecialization.value = "";
+    selectedPhdField.value = "";
+  }
+  selectedEducationLevel.value = level;
+  openSection.value = null;
+};
+
+const selectStream = (stream: string) => {
+  selectedStream.value = stream;
+  openSection.value = null;
+};
+
+const selectDiploma = (diploma: string) => {
+  selectedDiploma.value = diploma;
+  openSection.value = null;
+};
+
+const selectDegree = (degree: string) => {
+  if (selectedDegree.value !== degree) {
+    selectedSpecialization.value = "";
+  }
+  selectedDegree.value = degree;
+  openSection.value = null;
+};
+
+const selectSpecialization = (spec: string) => {
+  selectedSpecialization.value = spec;
+  openSection.value = null;
+};
+
+const selectPhdField = (field: string) => {
+  selectedPhdField.value = field;
+  openSection.value = null;
+};
+
+// Salary handlers
+const selectMinSalary = (val: string) => {
+  selectedMinSalary.value = selectedMinSalary.value === val ? "" : val;
+  openSection.value = null;
+};
+
+const selectMaxSalary = (val: string) => {
+  selectedMaxSalary.value = selectedMaxSalary.value === val ? "" : val;
+  openSection.value = null;
+};
+
+// Industry, Shift, Urgency handlers
+const selectIndustry = (val: string) => {
+  selectedIndustry.value = val;
+  openSection.value = null;
+};
+
+const selectShift = (val: string) => {
+  selectedShift.value = val;
+  openSection.value = null;
+};
+
+const selectUrgency = (val: string) => {
+  selectedUrgency.value = val;
+  openSection.value = null;
+};
+
+/* =========================
+   APPLY
+========================= */
+
+const applyFilters = () => {
+  emit("apply", {
+    jobType: selectedJobType.value,
+    experience: selectedExperience.value,
+    workMode: selectedWorkMode.value,
+    country: selectedCountry.value,
+    state: selectedState.value,
+    district: selectedDistrict.value,
+    city: selectedCity.value,
+    location: locationSearch.value,
+    educationLevel: selectedEducationLevel.value,
+    stream: selectedStream.value,
+    diploma: selectedDiploma.value,
+    degree: selectedDegree.value,
+    specialization: selectedSpecialization.value,
+    phdField: selectedPhdField.value,
+    minSalary: selectedMinSalary.value,
+    maxSalary: selectedMaxSalary.value,
+    industry: selectedIndustry.value,
+    shift: selectedShift.value,
+    urgency: selectedUrgency.value,
+  });
+};
+
+/* =========================
+   CLEAR
+========================= */
+
+const clearFilters = () => {
+  selectedJobType.value = "";
+  selectedExperience.value = "";
+  selectedWorkMode.value = "";
 
   selectedCountry.value = "";
   selectedState.value = "";
   selectedDistrict.value = "";
   selectedCity.value = "";
-}
+
+  selectedEducationLevel.value = "";
+  selectedStream.value = "";
+  selectedDiploma.value = "";
+  selectedDegree.value = "";
+  selectedSpecialization.value = "";
+  selectedPhdField.value = "";
+
+  selectedMinSalary.value = "";
+  selectedMaxSalary.value = "";
+  selectedIndustry.value = "";
+  selectedShift.value = "";
+  selectedUrgency.value = "";
+
+  locationSearch.value = "";
+
+  openSection.value = null;
+  openLocationSub.value = null;
+
+  emit("clear");
+};
 </script>
 
 <template>
   <aside
-    class="ui-card ui-card--compact flex h-full min-h-0 w-full flex-col rounded-lg overflow-hidden"
+    class="w-full h-full min-h-0 flex flex-col bg-white border border-slate-300 rounded-lg overflow-hidden"
   >
 
-    <!-- =========================================
-         FILTER HEADER
-    ========================================== -->
+    <!-- ================= HEADER ================= -->
 
     <div
-      class="shrink-0 border-b border-slate-200 bg-white px-3 py-3"
+      class="shrink-0 flex items-center justify-between px-3 py-2 border-b border-slate-300 bg-white"
     >
-      <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <SlidersHorizontal
+          class="w-4 h-4 text-violet-600"
+        />
 
-        <div class="flex items-center gap-2">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-900">
+            Filters
+          </h2>
 
-          <div
-            class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-violet-600"
-          >
-            <SlidersHorizontal class="h-4 w-4" />
-          </div>
-
-          <div>
-            <h2 class="text-sm font-semibold text-slate-900">
-              Filters
-            </h2>
-
-            <p class="text-[11px] text-slate-400">
-              0 active
-            </p>
-          </div>
-
+          <p class="text-[11px] text-slate-400">
+            {{ 
+              [
+                selectedJobType,
+                selectedExperience,
+                selectedWorkMode,
+                selectedCountry,
+                selectedState,
+                selectedDistrict,
+                selectedCity,
+                selectedEducationLevel,
+                selectedStream,
+                selectedDiploma,
+                selectedDegree,
+                selectedSpecialization,
+                selectedPhdField,
+                selectedMinSalary,
+                selectedMaxSalary,
+                selectedIndustry,
+                selectedShift,
+                selectedUrgency,
+              ].filter(Boolean).length
+            }}
+            active
+          </p>
         </div>
-
-        <button
-          type="button"
-          @click="clearAll"
-          class="text-xs font-semibold text-violet-600 hover:text-violet-700"
-        >
-          Clear all
-        </button>
-
       </div>
+
+      <button
+        type="button"
+        @click="clearFilters"
+        class="text-xs font-medium text-violet-600 hover:text-violet-700"
+      >
+        Clear all
+      </button>
     </div>
 
 
-    <!-- =========================================
-         SCROLLABLE FILTER CONTENT
-    ========================================== -->
+    <!-- ================= SCROLLABLE CONTENT ================= -->
 
     <div
-      class="flex-1 min-h-0 overflow-y-auto scrollbar-hide"
+      class="flex-1 min-h-0 overflow-y-auto px-2 py-2 space-y-3"
     >
 
-      <div class="px-3">
+      <!-- ================= LOCATION ================= -->
 
+      <section>
+        <div class="flex items-center gap-2 mb-2">
+          <MapPin
+            class="w-4 h-4 text-violet-600"
+          />
 
-        <!-- =====================================
-             LOCATION
-        ====================================== -->
+          <h3 class="text-sm font-semibold text-slate-900">
+            Location
+          </h3>
+        </div>
 
-        <div class="border-b border-slate-200 py-3">
+        <!-- Location Container -->
 
-          <!-- Simple text row -->
-          <div
-            class="flex cursor-pointer items-center justify-between"
-            @click="toggleSection('location')"
+        <div
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+
+          <!-- Location holder -->
+
+          <button
+            type="button"
+            @click="openDropdown('location')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
           >
-
-            <div class="flex items-center gap-2">
-
-              <MapPin
-                class="h-4 w-4 text-violet-600"
-              />
-
-              <span
-                class="text-sm font-semibold text-slate-900"
-              >
-                Location
-              </span>
-
-            </div>
+            <span
+              class="text-sm truncate"
+              :class="
+                selectedCity ||
+                selectedState ||
+                selectedCountry
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ locationDisplay }}
+            </span>
 
             <ChevronDown
-              class="h-4 w-4 text-slate-500 transition-transform duration-200"
+              class="w-4 h-4 text-slate-400 transition"
               :class="
-                openSections.location
+                openSection === 'location'
                   ? 'rotate-180'
                   : ''
               "
             />
+          </button>
 
-          </div>
 
+          <!-- Location dropdown -->
 
-          <!-- Location content -->
           <div
-            v-if="openSections.location"
-            class="mt-3"
+            v-if="openSection === 'location'"
+            class="border-t border-slate-200 p-2 space-y-2 bg-slate-50/50"
           >
 
-            <!-- Locality -->
-            <div>
+            <!-- Search -->
 
-              <label
-                class="mb-1.5 block text-xs font-medium text-slate-600"
-              >
-                Nearby Locality / Landmark
-              </label>
-
-              <input
-                v-model="locality"
-                type="text"
-                placeholder="e.g. Manish Nagar, Katol Road"
-                class="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-100"
+            <div class="relative">
+              <Search
+                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
               />
 
+              <input
+                v-model="locationSearch"
+                type="text"
+                placeholder="Search location"
+                class="w-full h-7 rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-200"
+              />
             </div>
 
 
             <!-- Current Location -->
+
             <button
               type="button"
               @click="useCurrentLocation"
-              class="mt-2 flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-violet-50 text-xs font-semibold text-violet-600 transition hover:bg-violet-100"
+              class="w-full h-7 rounded-md bg-violet-50 text-violet-600 text-xs font-semibold hover:bg-violet-100 transition flex items-center justify-center gap-1.5"
             >
-
-              <Navigation class="h-3.5 w-3.5" />
-
-              Use Current Location
-
+              <Navigation class="w-3.5 h-3.5" />
+              <span>Use Current Location</span>
             </button>
 
 
             <!-- Country -->
-            <div class="mt-3">
 
+            <div>
               <label
-                class="mb-1.5 block text-xs font-semibold text-slate-800"
+                class="flex items-center gap-1.5 mb-1 text-sm font-medium text-slate-700"
               >
-                Country
+                <Globe class="w-3.5 h-3.5 text-slate-400" />
+                <span>Country</span>
               </label>
 
-              <div class="relative">
-
-                <select
-                  v-model="selectedCountry"
-                  class="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 px-3 pr-9 text-xs text-slate-600 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-100"
+              <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+                <button
+                  type="button"
+                  @click="toggleLocationSub('country')"
+                  class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
                 >
+                  <span
+                    class="text-sm truncate"
+                    :class="selectedCountry ? 'text-slate-900 font-medium' : 'text-slate-400'"
+                  >
+                    {{ selectedCountry || "Select country" }}
+                  </span>
 
-                  <option value="" disabled>
-                    Select country
-                  </option>
+                  <ChevronDown
+                    class="w-4 h-4 text-slate-400 transition"
+                    :class="openLocationSub === 'country' ? 'rotate-180' : ''"
+                  />
+                </button>
 
-                  <option
-                    v-for="country in countries"
+                <div
+                  v-if="openLocationSub === 'country'"
+                  class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-40 overflow-y-auto"
+                >
+                  <button
+                    v-for="country in filteredCountries"
                     :key="country"
-                    :value="country"
+                    type="button"
+                    @click="selectCountry(country)"
+                    class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition truncate"
+                    :class="
+                      selectedCountry === country
+                        ? 'bg-violet-50 text-violet-600 font-medium'
+                        : 'text-slate-700'
+                    "
                   >
                     {{ country }}
-                  </option>
-
-                </select>
-
-                <ChevronDown
-                  class="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
-                />
-
+                  </button>
+                </div>
               </div>
-
             </div>
 
 
             <!-- State -->
-            <div class="mt-3">
 
+            <div>
               <label
-                class="mb-1.5 block text-xs font-semibold text-slate-800"
+                class="flex items-center gap-1.5 mb-1 text-sm font-medium text-slate-700"
               >
-                State
+                <Landmark class="w-3.5 h-3.5 text-slate-400" />
+                <span>State</span>
               </label>
 
-              <div class="relative">
-
-                <select
-                  v-model="selectedState"
-                  class="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 px-3 pr-9 text-xs text-slate-600 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-100"
+              <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+                <button
+                  type="button"
+                  @click="toggleLocationSub('state')"
+                  class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
                 >
+                  <span
+                    class="text-sm truncate"
+                    :class="selectedState ? 'text-slate-900 font-medium' : 'text-slate-400'"
+                  >
+                    {{ selectedState || "Select state" }}
+                  </span>
 
-                  <option value="" disabled>
-                    Select state
-                  </option>
+                  <ChevronDown
+                    class="w-4 h-4 text-slate-400 transition"
+                    :class="openLocationSub === 'state' ? 'rotate-180' : ''"
+                  />
+                </button>
 
-                  <option
-                    v-for="state in states"
+                <div
+                  v-if="openLocationSub === 'state'"
+                  class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-40 overflow-y-auto"
+                >
+                  <button
+                    v-for="state in filteredStates"
                     :key="state"
-                    :value="state"
+                    type="button"
+                    @click="selectState(state)"
+                    class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition truncate"
+                    :class="
+                      selectedState === state
+                        ? 'bg-violet-50 text-violet-600 font-medium'
+                        : 'text-slate-700'
+                    "
                   >
                     {{ state }}
-                  </option>
-
-                </select>
-
-                <ChevronDown
-                  class="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
-                />
-
+                  </button>
+                </div>
               </div>
-
             </div>
 
 
             <!-- District -->
-            <div class="mt-3">
 
+            <div>
               <label
-                class="mb-1.5 block text-xs font-semibold text-slate-800"
+                class="flex items-center gap-1.5 mb-1 text-sm font-medium text-slate-700"
               >
-                District
+                <Map class="w-3.5 h-3.5 text-slate-400" />
+                <span>District</span>
               </label>
 
-              <div class="relative">
-
-                <select
-                  v-model="selectedDistrict"
-                  class="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 px-3 pr-9 text-xs text-slate-600 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-100"
+              <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+                <button
+                  type="button"
+                  @click="toggleLocationSub('district')"
+                  class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
                 >
+                  <span
+                    class="text-sm truncate"
+                    :class="selectedDistrict ? 'text-slate-900 font-medium' : 'text-slate-400'"
+                  >
+                    {{ selectedDistrict || "Select district" }}
+                  </span>
 
-                  <option value="" disabled>
-                    Select district
-                  </option>
+                  <ChevronDown
+                    class="w-4 h-4 text-slate-400 transition"
+                    :class="openLocationSub === 'district' ? 'rotate-180' : ''"
+                  />
+                </button>
 
-                  <option
-                    v-for="district in districts"
+                <div
+                  v-if="openLocationSub === 'district'"
+                  class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-40 overflow-y-auto"
+                >
+                  <button
+                    v-for="district in filteredDistricts"
                     :key="district"
-                    :value="district"
+                    type="button"
+                    @click="selectDistrict(district)"
+                    class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition truncate"
+                    :class="
+                      selectedDistrict === district
+                        ? 'bg-violet-50 text-violet-600 font-medium'
+                        : 'text-slate-700'
+                    "
                   >
                     {{ district }}
-                  </option>
-
-                </select>
-
-                <ChevronDown
-                  class="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
-                />
-
+                  </button>
+                </div>
               </div>
-
             </div>
 
 
             <!-- City -->
-            <div class="mt-3">
 
+            <div>
               <label
-                class="mb-1.5 block text-xs font-semibold text-slate-800"
+                class="flex items-center gap-1.5 mb-1 text-sm font-medium text-slate-700"
               >
-                City
+                <Building2 class="w-3.5 h-3.5 text-slate-400" />
+                <span>City</span>
               </label>
 
-              <div class="relative">
-
-                <select
-                  v-model="selectedCity"
-                  class="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 px-3 pr-9 text-xs text-slate-600 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-100"
+              <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+                <button
+                  type="button"
+                  @click="toggleLocationSub('city')"
+                  class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
                 >
+                  <span
+                    class="text-sm truncate"
+                    :class="selectedCity ? 'text-slate-900 font-medium' : 'text-slate-400'"
+                  >
+                    {{ selectedCity || "Select city" }}
+                  </span>
 
-                  <option value="" disabled>
-                    Select city
-                  </option>
+                  <ChevronDown
+                    class="w-4 h-4 text-slate-400 transition"
+                    :class="openLocationSub === 'city' ? 'rotate-180' : ''"
+                  />
+                </button>
 
-                  <option
-                    v-for="city in cities"
+                <div
+                  v-if="openLocationSub === 'city'"
+                  class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-40 overflow-y-auto"
+                >
+                  <button
+                    v-for="city in filteredCities"
                     :key="city"
-                    :value="city"
+                    type="button"
+                    @click="selectCity(city)"
+                    class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition truncate"
+                    :class="
+                      selectedCity === city
+                        ? 'bg-violet-50 text-violet-600 font-medium'
+                        : 'text-slate-700'
+                    "
                   >
                     {{ city }}
-                  </option>
-
-                </select>
-
-                <ChevronDown
-                  class="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
-                />
-
+                  </button>
+                </div>
               </div>
-
             </div>
 
           </div>
+        </div>
+      </section>
 
+
+      <!-- ================= JOB TYPE ================= -->
+
+      <section>
+        <div class="flex items-center gap-2 mb-2">
+          <Briefcase
+            class="w-4 h-4 text-violet-600"
+          />
+
+          <h3 class="text-sm font-semibold text-slate-900">
+            Job Type
+          </h3>
         </div>
 
+        <div
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
 
-        <!-- =====================================
-             JOB TYPE
-        ====================================== -->
-
-        <div class="filter-row">
-
-          <div
-            class="filter-title"
-            @click="toggleSection('jobType')"
+          <button
+            type="button"
+            @click="openDropdown('jobType')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50"
           >
-
-            <div class="flex items-center gap-2">
-
-              <BriefcaseBusiness class="filter-icon" />
-
-              <span>
-                {{ props.mode === "internship"
-                  ? "Internship Type"
-                  : "Job Type"
-                }}
-              </span>
-
-            </div>
+            <span
+              class="text-md"
+              :class="
+                selectedJobType
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ selectedJobType || "Select job type" }}
+            </span>
 
             <ChevronDown
-              class="filter-chevron"
+              class="w-4 h-4 text-slate-400 transition"
               :class="
-                openSections.jobType
+                openSection === 'jobType'
                   ? 'rotate-180'
                   : ''
               "
             />
-
-          </div>
+          </button>
 
           <div
-            v-if="openSections.jobType"
-            class="filter-options"
+            v-if="openSection === 'jobType'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5"
           >
-
             <button
-              v-for="item in jobTypes"
-              :key="item"
-              class="filter-option"
+              v-for="type in jobTypes"
+              :key="type"
+              type="button"
+              @click="selectJobType(type)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
+              :class="
+                selectedJobType === type
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
+              "
             >
-              {{ item }}
+              {{ type }}
             </button>
-
           </div>
 
         </div>
+      </section>
 
 
-        <!-- =====================================
-             EXPERIENCE
-        ====================================== -->
+      <!-- ================= EXPERIENCE ================= -->
 
-        <div class="filter-row">
+      <section>
+        <div class="flex items-center gap-2 mb-2">
+          <Award
+            class="w-4 h-4 text-violet-600"
+          />
 
-          <div
-            class="filter-title"
-            @click="toggleSection('experience')"
+          <h3 class="text-sm font-semibold text-slate-900">
+            Experience Level
+          </h3>
+        </div>
+
+        <div
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+
+          <button
+            type="button"
+            @click="openDropdown('experience')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50"
           >
-
-            <div class="flex items-center gap-2">
-
-              <GraduationCap class="filter-icon" />
-
-              <span>
-                Experience Level
-              </span>
-
-            </div>
+            <span
+              class="text-sm"
+              :class="
+                selectedExperience
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{
+                selectedExperience ||
+                "Select experience level"
+              }}
+            </span>
 
             <ChevronDown
-              class="filter-chevron"
+              class="w-4 h-4 text-slate-400 transition"
               :class="
-                openSections.experience
+                openSection === 'experience'
                   ? 'rotate-180'
                   : ''
               "
             />
-
-          </div>
+          </button>
 
           <div
-            v-if="openSections.experience"
-            class="filter-options"
+            v-if="openSection === 'experience'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5"
           >
-
             <button
-              v-for="item in experience"
-              :key="item"
-              class="filter-option"
+              v-for="experience in experienceLevels"
+              :key="experience"
+              type="button"
+              @click="selectExperience(experience)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
+              :class="
+                selectedExperience === experience
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
+              "
             >
-              {{ item }}
+              {{ experience }}
             </button>
-
           </div>
 
         </div>
+      </section>
 
 
-        <!-- =====================================
-             SALARY RANGE
-        ====================================== -->
+      <!-- ================= EDUCATION ================= -->
 
-        <div class="filter-row">
+      <section class="space-y-2">
+        <!-- Education Heading -->
+        <div class="flex items-center gap-2 mb-2">
+          <GraduationCap
+            class="w-4 h-4 text-violet-600"
+          />
 
-          <div
-            class="filter-title"
-            @click="toggleSection('salary')"
+          <h3 class="text-sm font-semibold text-slate-900">
+            Education
+          </h3>
+        </div>
+
+        <!-- 1. Education Level Dropdown Container -->
+        <div
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+          <button
+            type="button"
+            @click="openDropdown('educationLevel')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
           >
-
-            <div class="flex items-center gap-2">
-
-              <span class="text-sm font-semibold text-violet-600">
-                ₹
-              </span>
-
-              <span>
-                Salary Range
-              </span>
-
-            </div>
+            <span
+              class="text-sm"
+              :class="
+                selectedEducationLevel
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ selectedEducationLevel || "Select education level" }}
+            </span>
 
             <ChevronDown
-              class="filter-chevron"
+              class="w-4 h-4 text-slate-400 transition"
               :class="
-                openSections.salary
+                openSection === 'educationLevel'
                   ? 'rotate-180'
                   : ''
               "
             />
-
-          </div>
+          </button>
 
           <div
-            v-if="openSections.salary"
-            class="px-1 pb-2 pt-2"
+            v-if="openSection === 'educationLevel'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-48 overflow-y-auto"
           >
-
-            <div
-              class="mb-2 flex items-center justify-between"
+            <button
+              v-for="level in educationLevels"
+              :key="level"
+              type="button"
+              @click="selectEducationLevel(level)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
+              :class="
+                selectedEducationLevel === level
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
+              "
             >
+              {{ level }}
+            </button>
+          </div>
+        </div>
 
-              <span class="text-xs text-slate-500">
-                Salary
-              </span>
+        <!-- 2. Stream Dropdown (for 12th / HSC) -->
+        <div
+          v-if="selectedEducationLevel === '12th / HSC'"
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+          <button
+            type="button"
+            @click="openDropdown('stream')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
+          >
+            <span
+              class="text-sm"
+              :class="
+                selectedStream
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ selectedStream || "Select stream" }}
+            </span>
 
+            <ChevronDown
+              class="w-4 h-4 text-slate-400 transition"
+              :class="
+                openSection === 'stream'
+                  ? 'rotate-180'
+                  : ''
+              "
+            />
+          </button>
+
+          <div
+            v-if="openSection === 'stream'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5"
+          >
+            <button
+              v-for="stream in streams"
+              :key="stream"
+              type="button"
+              @click="selectStream(stream)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
+              :class="
+                selectedStream === stream
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
+              "
+            >
+              {{ stream }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Diploma Dropdown (for Diploma) -->
+        <div
+          v-if="selectedEducationLevel === 'Diploma'"
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+          <button
+            type="button"
+            @click="openDropdown('diploma')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
+          >
+            <span
+              class="text-sm"
+              :class="
+                selectedDiploma
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ selectedDiploma || "Select diploma" }}
+            </span>
+
+            <ChevronDown
+              class="w-4 h-4 text-slate-400 transition"
+              :class="
+                openSection === 'diploma'
+                  ? 'rotate-180'
+                  : ''
+              "
+            />
+          </button>
+
+          <div
+            v-if="openSection === 'diploma'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-48 overflow-y-auto"
+          >
+            <button
+              v-for="diploma in diplomaOptions"
+              :key="diploma"
+              type="button"
+              @click="selectDiploma(diploma)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
+              :class="
+                selectedDiploma === diploma
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
+              "
+            >
+              {{ diploma }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Degree Dropdown (for Bachelor's Degree or Master's Degree) -->
+        <div
+          v-if="selectedEducationLevel === 'Bachelor\'s Degree' || selectedEducationLevel === 'Master\'s Degree'"
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+          <button
+            type="button"
+            @click="openDropdown('degree')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
+          >
+            <span
+              class="text-sm"
+              :class="
+                selectedDegree
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ selectedDegree || "Select degree" }}
+            </span>
+
+            <ChevronDown
+              class="w-4 h-4 text-slate-400 transition"
+              :class="
+                openSection === 'degree'
+                  ? 'rotate-180'
+                  : ''
+              "
+            />
+          </button>
+
+          <div
+            v-if="openSection === 'degree'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-48 overflow-y-auto"
+          >
+            <button
+              v-for="degree in currentDegreeOptions"
+              :key="degree"
+              type="button"
+              @click="selectDegree(degree)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
+              :class="
+                selectedDegree === degree
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
+              "
+            >
+              {{ degree }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 5. Specialization Dropdown (after Bachelor's or Master's Degree is selected) -->
+        <div
+          v-if="(selectedEducationLevel === 'Bachelor\'s Degree' || selectedEducationLevel === 'Master\'s Degree') && selectedDegree"
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+          <button
+            type="button"
+            @click="openDropdown('specialization')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
+          >
+            <span
+              class="text-sm"
+              :class="
+                selectedSpecialization
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ selectedSpecialization || "Select specialization" }}
+            </span>
+
+            <ChevronDown
+              class="w-4 h-4 text-slate-400 transition"
+              :class="
+                openSection === 'specialization'
+                  ? 'rotate-180'
+                  : ''
+              "
+            />
+          </button>
+
+          <div
+            v-if="openSection === 'specialization'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-48 overflow-y-auto"
+          >
+            <button
+              v-for="spec in currentSpecializationOptions"
+              :key="spec"
+              type="button"
+              @click="selectSpecialization(spec)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
+              :class="
+                selectedSpecialization === spec
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
+              "
+            >
+              {{ spec }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 6. Field Dropdown (for PhD / Doctorate) -->
+        <div
+          v-if="selectedEducationLevel === 'PhD / Doctorate'"
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+          <button
+            type="button"
+            @click="openDropdown('phdField')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
+          >
+            <span
+              class="text-sm"
+              :class="
+                selectedPhdField
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ selectedPhdField || "Select field" }}
+            </span>
+
+            <ChevronDown
+              class="w-4 h-4 text-slate-400 transition"
+              :class="
+                openSection === 'phdField'
+                  ? 'rotate-180'
+                  : ''
+              "
+            />
+          </button>
+
+          <div
+            v-if="openSection === 'phdField'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-48 overflow-y-auto"
+          >
+            <button
+              v-for="field in phdFields"
+              :key="field"
+              type="button"
+              @click="selectPhdField(field)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
+              :class="
+                selectedPhdField === field
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
+              "
+            >
+              {{ field }}
+            </button>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= SALARY ================= -->
+
+      <section>
+        <div class="flex items-center gap-2 mb-2">
+          <IndianRupee
+            class="w-4 h-4 text-violet-600"
+          />
+
+          <h3 class="text-sm font-semibold text-slate-900">
+            Salary
+          </h3>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 items-start">
+          <!-- Minimum Salary Dropdown -->
+          <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+            <button
+              type="button"
+              @click="openDropdown('minSalary')"
+              class="w-full h-7 px-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition"
+            >
               <span
-                class="rounded-md bg-violet-600 px-2.5 py-1 text-xs font-semibold text-white"
+                class="text-xs truncate"
+                :class="
+                  selectedMinSalary
+                    ? 'text-slate-900 font-medium'
+                    : 'text-slate-400'
+                "
               >
-                ${{ salary }}
+                {{ selectedMinSalary ? `Min: ${selectedMinSalary}` : "Min salary" }}
               </span>
 
-            </div>
-
-            <input
-              v-model="salary"
-              type="range"
-              min="300"
-              max="5000"
-              class="w-full accent-violet-600"
-            />
+              <ChevronDown
+                class="w-3.5 h-3.5 shrink-0 text-slate-400 transition"
+                :class="
+                  openSection === 'minSalary'
+                    ? 'rotate-180'
+                    : ''
+                "
+              />
+            </button>
 
             <div
-              class="mt-1 flex justify-between text-[11px] text-slate-400"
+              v-if="openSection === 'minSalary'"
+              class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-44 overflow-y-auto"
             >
-              <span>$300</span>
-              <span>$5k</span>
+              <button
+                v-for="min in minSalaryOptions"
+                :key="min"
+                type="button"
+                @click="selectMinSalary(min)"
+                class="w-full px-2 py-1 rounded text-left text-xs hover:bg-violet-50 hover:text-violet-600 transition truncate"
+                :class="
+                  selectedMinSalary === min
+                    ? 'bg-violet-50 text-violet-600 font-medium'
+                    : 'text-slate-700'
+                "
+              >
+                {{ min }}
+              </button>
             </div>
-
           </div>
 
-        </div>
-
-
-        <!-- =====================================
-             DEPARTMENT
-        ====================================== -->
-
-        <div class="filter-row">
-
-          <div
-            class="filter-title"
-            @click="toggleSection('department')"
-          >
-
-            <div class="flex items-center gap-2">
-
-              <Building2 class="filter-icon" />
-
-              <span>
-                {{ props.mode === "internship"
-                  ? "Field"
-                  : "Department"
-                }}
+          <!-- Maximum Salary Dropdown -->
+          <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+            <button
+              type="button"
+              @click="openDropdown('maxSalary')"
+              class="w-full h-7 px-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition"
+            >
+              <span
+                class="text-xs truncate"
+                :class="
+                  selectedMaxSalary
+                    ? 'text-slate-900 font-medium'
+                    : 'text-slate-400'
+                "
+              >
+                {{ selectedMaxSalary ? `Max: ${selectedMaxSalary}` : "Max salary" }}
               </span>
 
+              <ChevronDown
+                class="w-3.5 h-3.5 shrink-0 text-slate-400 transition"
+                :class="
+                  openSection === 'maxSalary'
+                    ? 'rotate-180'
+                    : ''
+                "
+              />
+            </button>
+
+            <div
+              v-if="openSection === 'maxSalary'"
+              class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-44 overflow-y-auto"
+            >
+              <button
+                v-for="max in maxSalaryOptions"
+                :key="max"
+                type="button"
+                @click="selectMaxSalary(max)"
+                class="w-full px-2 py-1 rounded text-left text-xs hover:bg-violet-50 hover:text-violet-600 transition truncate"
+                :class="
+                  selectedMaxSalary === max
+                    ? 'bg-violet-50 text-violet-600 font-medium'
+                    : 'text-slate-700'
+                "
+              >
+                {{ max }}
+              </button>
             </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= WORK MODE ================= -->
+
+      <section>
+        <div class="flex items-center gap-2 mb-2">
+          <Laptop
+            class="w-4 h-4 text-violet-600"
+          />
+
+          <h3 class="text-sm font-semibold text-slate-900">
+            Work Mode
+          </h3>
+        </div>
+
+        <div
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+
+          <button
+            type="button"
+            @click="openDropdown('workMode')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50"
+          >
+            <span
+              class="text-sm"
+              :class="
+                selectedWorkMode
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ selectedWorkMode || "Select work mode" }}
+            </span>
 
             <ChevronDown
-              class="filter-chevron"
+              class="w-4 h-4 text-slate-400 transition"
               :class="
-                openSections.department
+                openSection === 'workMode'
                   ? 'rotate-180'
                   : ''
               "
             />
-
-          </div>
+          </button>
 
           <div
-            v-if="openSections.department"
-            class="filter-options"
+            v-if="openSection === 'workMode'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5"
           >
-
             <button
-              v-for="item in departments"
-              :key="item"
-              class="filter-option"
+              v-for="mode in workModes"
+              :key="mode"
+              type="button"
+              @click="selectWorkMode(mode)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
+              :class="
+                selectedWorkMode === mode
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
+              "
             >
-              {{ item }}
+              {{ mode }}
             </button>
-
           </div>
 
         </div>
+      </section>
 
 
-        <!-- =====================================
-             COMPANY TYPE
-        ====================================== -->
+      <!-- ================= INDUSTRY ================= -->
 
-        <div class="filter-row">
+      <section>
+        <div class="flex items-center gap-2 mb-2">
+          <Factory
+            class="w-4 h-4 text-violet-600"
+          />
 
-          <div
-            class="filter-title"
-            @click="toggleSection('companyType')"
+          <h3 class="text-sm font-semibold text-slate-900">
+            Industry
+          </h3>
+        </div>
+
+        <div
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+
+          <button
+            type="button"
+            @click="openDropdown('industry')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50"
           >
-
-            <div class="flex items-center gap-2">
-
-              <Layers3 class="filter-icon" />
-
-              <span>
-                Company Type
-              </span>
-
-            </div>
+            <span
+              class="text-sm"
+              :class="
+                selectedIndustry
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ selectedIndustry || "Select industry" }}
+            </span>
 
             <ChevronDown
-              class="filter-chevron"
+              class="w-4 h-4 text-slate-400 transition"
               :class="
-                openSections.companyType
+                openSection === 'industry'
                   ? 'rotate-180'
                   : ''
               "
             />
-
-          </div>
+          </button>
 
           <div
-            v-if="openSections.companyType"
-            class="filter-options"
+            v-if="openSection === 'industry'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5 max-h-48 overflow-y-auto"
           >
-
             <button
-              v-for="item in companyTypes"
-              :key="item"
-              class="filter-option"
+              v-for="ind in industryOptions"
+              :key="ind"
+              type="button"
+              @click="selectIndustry(ind)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
+              :class="
+                selectedIndustry === ind
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
+              "
             >
-              {{ item }}
+              {{ ind }}
             </button>
-
           </div>
 
         </div>
+      </section>
 
 
-        <!-- =====================================
-             ROLE CATEGORY
-        ====================================== -->
+      <!-- ================= SHIFT ================= -->
 
-        <div class="filter-row">
+      <section>
+        <div class="flex items-center gap-2 mb-2">
+          <Clock
+            class="w-4 h-4 text-violet-600"
+          />
 
-          <div
-            class="filter-title"
-            @click="toggleSection('roleCategory')"
+          <h3 class="text-sm font-semibold text-slate-900">
+            Shift
+          </h3>
+        </div>
+
+        <div
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+
+          <button
+            type="button"
+            @click="openDropdown('shift')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50"
           >
-
-            <div class="flex items-center gap-2">
-
-              <UsersRound class="filter-icon" />
-
-              <span>
-                Role Category
-              </span>
-
-            </div>
+            <span
+              class="text-sm"
+              :class="
+                selectedShift
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ selectedShift || "Select shift" }}
+            </span>
 
             <ChevronDown
-              class="filter-chevron"
+              class="w-4 h-4 text-slate-400 transition"
               :class="
-                openSections.roleCategory
+                openSection === 'shift'
                   ? 'rotate-180'
                   : ''
               "
             />
-
-          </div>
+          </button>
 
           <div
-            v-if="openSections.roleCategory"
-            class="filter-options"
+            v-if="openSection === 'shift'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5"
           >
-
             <button
-              v-for="item in roleCategories"
-              :key="item"
-              class="filter-option"
+              v-for="shift in shiftOptions"
+              :key="shift"
+              type="button"
+              @click="selectShift(shift)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
+              :class="
+                selectedShift === shift
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
+              "
             >
-              {{ item }}
+              {{ shift }}
             </button>
-
           </div>
 
         </div>
+      </section>
 
 
-        <!-- =====================================
-             EDUCATION
-        ====================================== -->
+      <!-- ================= HIRING URGENCY ================= -->
 
-        <div class="filter-row">
+      <section>
+        <div class="flex items-center gap-2 mb-2">
+          <Zap
+            class="w-4 h-4 text-violet-600"
+          />
 
-          <div
-            class="filter-title"
-            @click="toggleSection('education')"
+          <h3 class="text-sm font-semibold text-slate-900">
+            Hiring Urgency
+          </h3>
+        </div>
+
+        <div
+          class="rounded-lg border border-slate-200 bg-white overflow-hidden"
+        >
+
+          <button
+            type="button"
+            @click="openDropdown('urgency')"
+            class="w-full h-7 px-3 flex items-center justify-between text-left hover:bg-slate-50"
           >
-
-            <div class="flex items-center gap-2">
-
-              <BookOpen class="filter-icon" />
-
-              <span>
-                Education
-              </span>
-
-            </div>
+            <span
+              class="text-sm"
+              :class="
+                selectedUrgency
+                  ? 'text-slate-900'
+                  : 'text-slate-400'
+              "
+            >
+              {{ selectedUrgency || "Select hiring urgency" }}
+            </span>
 
             <ChevronDown
-              class="filter-chevron"
+              class="w-4 h-4 text-slate-400 transition"
               :class="
-                openSections.education
+                openSection === 'urgency'
                   ? 'rotate-180'
                   : ''
               "
             />
-
-          </div>
+          </button>
 
           <div
-            v-if="openSections.education"
-            class="filter-options"
+            v-if="openSection === 'urgency'"
+            class="border-t border-slate-200 p-1 bg-slate-50/50 space-y-0.5"
           >
-
             <button
-              v-for="item in educations"
-              :key="item"
-              class="filter-option"
-            >
-              {{ item }}
-            </button>
-
-          </div>
-
-        </div>
-
-
-        <!-- =====================================
-             POSTED BY
-        ====================================== -->
-
-        <div class="filter-row">
-
-          <div
-            class="filter-title"
-            @click="toggleSection('postedBy')"
-          >
-
-            <div class="flex items-center gap-2">
-
-              <UserRound class="filter-icon" />
-
-              <span>
-                Posted By
-              </span>
-
-            </div>
-
-            <ChevronDown
-              class="filter-chevron"
+              v-for="urgency in urgencyOptions"
+              :key="urgency"
+              type="button"
+              @click="selectUrgency(urgency)"
+              class="w-full px-2.5 py-1 rounded text-left text-sm hover:bg-violet-50 hover:text-violet-600 transition"
               :class="
-                openSections.postedBy
-                  ? 'rotate-180'
-                  : ''
+                selectedUrgency === urgency
+                  ? 'bg-violet-50 text-violet-600 font-medium'
+                  : 'text-slate-700'
               "
-            />
-
-          </div>
-
-          <div
-            v-if="openSections.postedBy"
-            class="filter-options"
-          >
-
-            <button
-              v-for="item in postedBy"
-              :key="item"
-              class="filter-option"
             >
-              {{ item }}
+              {{ urgency }}
             </button>
-
           </div>
 
         </div>
-
-
-        <!-- =====================================
-             INDUSTRY
-        ====================================== -->
-
-        <div class="filter-row">
-
-          <div
-            class="filter-title"
-            @click="toggleSection('industry')"
-          >
-
-            <div class="flex items-center gap-2">
-
-              <Building2 class="filter-icon" />
-
-              <span>
-                Industry
-              </span>
-
-            </div>
-
-            <ChevronDown
-              class="filter-chevron"
-              :class="
-                openSections.industry
-                  ? 'rotate-180'
-                  : ''
-              "
-            />
-
-          </div>
-
-          <div
-            v-if="openSections.industry"
-            class="filter-options"
-          >
-
-            <button
-              v-for="item in industries"
-              :key="item"
-              class="filter-option"
-            >
-              {{ item }}
-            </button>
-
-          </div>
-
-        </div>
-
-
-        <!-- =====================================
-             FRESHNESS
-        ====================================== -->
-
-        <div class="filter-row">
-
-          <div
-            class="filter-title"
-            @click="toggleSection('freshness')"
-          >
-
-            <div class="flex items-center gap-2">
-
-              <Clock3 class="filter-icon" />
-
-              <span>
-                Freshness
-              </span>
-
-            </div>
-
-            <ChevronDown
-              class="filter-chevron"
-              :class="
-                openSections.freshness
-                  ? 'rotate-180'
-                  : ''
-              "
-            />
-
-          </div>
-
-          <div
-            v-if="openSections.freshness"
-            class="filter-options"
-          >
-
-            <button
-              v-for="item in freshness"
-              :key="item"
-              class="filter-option"
-            >
-              {{ item }}
-            </button>
-
-          </div>
-
-        </div>
-
-
-        <!-- =====================================
-             APPLICANTS
-        ====================================== -->
-
-        <div class="filter-row">
-
-          <div
-            class="filter-title"
-            @click="toggleSection('applicants')"
-          >
-
-            <div class="flex items-center gap-2">
-
-              <UsersRound class="filter-icon" />
-
-              <span>
-                Applicants
-              </span>
-
-            </div>
-
-            <ChevronDown
-              class="filter-chevron"
-              :class="
-                openSections.applicants
-                  ? 'rotate-180'
-                  : ''
-              "
-            />
-
-          </div>
-
-          <div
-            v-if="openSections.applicants"
-            class="filter-options"
-          >
-
-            <button
-              v-for="item in applicants"
-              :key="item"
-              class="filter-option"
-            >
-              {{ item }}
-            </button>
-
-          </div>
-
-        </div>
-
-
-      </div>
+      </section>
 
     </div>
 
 
-    <!-- =========================================
-         APPLY BUTTON
-    ========================================== -->
+    <!-- ================= APPLY BUTTON ================= -->
 
     <div
-      class="shrink-0 border-t border-slate-200 bg-white p-3"
+      class="shrink-0 p-3 border-t border-slate-200 bg-white"
     >
-
       <button
         type="button"
-        class="w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700"
+        @click="applyFilters"
+        class="w-full h-10 rounded-lg bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition flex items-center justify-center gap-2"
       >
         Apply Filters
       </button>
-
     </div>
 
   </aside>
 </template>
-
-
-<style scoped>
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-
-/* --------------------------------
-   SIMPLE FILTER ROW
--------------------------------- */
-
-.filter-row {
-  border-bottom: 1px solid #e2e8f0;
-  padding: 13px 0;
-}
-
-.filter-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  cursor: pointer;
-
-  color: #0f172a;
-  font-size: 14px;
-  font-weight: 600;
-
-  transition: color 0.2s ease;
-}
-
-.filter-title:hover {
-  color: #6d28d9;
-}
-
-.filter-icon {
-  width: 16px;
-  height: 16px;
-  color: #7c3aed;
-}
-
-.filter-chevron {
-  width: 16px;
-  height: 16px;
-  color: #64748b;
-
-  transition: transform 0.2s ease;
-}
-
-
-/* --------------------------------
-   FILTER OPTIONS
--------------------------------- */
-
-.filter-options {
-  margin-top: 8px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-
-  padding: 4px;
-
-  background: #ffffff;
-}
-
-.filter-option {
-  width: 100%;
-
-  border: 0;
-  border-radius: 6px;
-
-  background: transparent;
-
-  padding: 8px 9px;
-
-  text-align: left;
-
-  color: #475569;
-
-  font-size: 12px;
-
-  cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    color 0.2s ease;
-}
-
-.filter-option:hover {
-  background: #f5f3ff;
-  color: #6d28d9;
-}
-
-</style>
