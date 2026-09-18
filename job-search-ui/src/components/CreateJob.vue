@@ -112,55 +112,43 @@ const defaultFormState = (): JobFormState => ({
   category: "",
   subcategory: "",
   department: "",
-  employmentType: "Full-time",
-  workMode: "On-site",
+  employmentType: "",
+  workMode: "",
   openings: "",
   minExperience: "",
   maxExperience: "",
   description: "",
-  skills: ["Vue.js", "TypeScript", "Tailwind CSS"],
+  skills: [],
 
-  currency: "INR (₹)",
-  minSalary: "12,00,000",
-  maxSalary: "22,00,000",
+  currency: "",
+  minSalary: "",
+  maxSalary: "",
   salaryPeriod: "Per Year",
   showSalaryOnPost: true,
-  selectedPerks: [
-    "Health Insurance",
-    "Provident Fund",
-    "Performance Bonus",
-    "Paid Leaves",
-  ],
+  selectedPerks: [],
 
-  qualification: "Bachelor's Degree in Computer Science or related field",
-  preferredSkills: ["Vite", "Node.js", "REST APIs", "Docker"],
-  certifications: "AWS Certified Developer (Optional)",
+  qualification: "",
+  preferredSkills: [],
+  certifications: "",
 
-  country: "India",
-  state: "Karnataka",
-  city: "Bangalore",
-  postalCode: "560001",
-  address: "Tower B, Electronic City Phase 1",
-  relocationAssistance: true,
+  country: "",
+  state: "",
+  city: "",
+  postalCode: "",
+  address: "",
+  relocationAssistance: false,
 
-  companyName: "WebArtifacts",
-  companyOverview:
-    "Building digital experiences for a better tomorrow. High-growth tech consulting and product engineering.",
-  hiringManager: "Lead Talent Acquisition Partner",
-  contactEmail: "careers@webartifacts.com",
+  companyName: "",
+  companyOverview: "",
+  hiringManager: "",
+  contactEmail: "",
 
-  selectedFacilities: [
-    "Cafeteria & Meals",
-    "High-Speed Internet",
-    "Free Parking",
-    "Ergonomic Chairs",
-    "Gaming & Relaxation Lounge",
-  ],
+  selectedFacilities: [],
 
-  shiftTiming: "Day Shift (9:30 AM - 6:30 PM)",
-  workingDays: "Monday to Friday (5 Days)",
-  travelRequirement: "No Travel Required",
-  overtimePolicy: "Compensatory Offs Available",
+  shiftTiming: "",
+  workingDays: "",
+  travelRequirement: "",
+  overtimePolicy: "",
 });
 
 const form = ref<JobFormState>(defaultFormState());
@@ -301,18 +289,27 @@ function goToPrevStep() {
 
 function submitJob() {
   const newJob = {
-    title: form.value.title || "Senior Frontend Architect",
-    role: form.value.roleDesignation || "Software Engineer II",
-    location: `${form.value.city || "Bangalore"}, ${form.value.state || "Karnataka"}`,
+    title: form.value.title || "Untitled Job",
+    role: form.value.roleDesignation || "Role Not Specified",
+    location:
+      form.value.city || form.value.state
+        ? `${form.value.city || ""}${form.value.city && form.value.state ? ", " : ""}${form.value.state || ""}`
+        : "Location Not Specified",
     type: form.value.employmentType || "Full-time",
     applications: 0,
     status: "Active",
     posted: "Just now",
-    department: form.value.department || "Engineering & IT",
+    department: form.value.department || "General",
     workMode: form.value.workMode || "On-site",
     openings: form.value.openings || 1,
-    experience: `${form.value.minExperience || "2"} - ${form.value.maxExperience || "5"} Years`,
-    salary: `${form.value.minSalary} - ${form.value.maxSalary} ${form.value.salaryPeriod}`,
+    experience:
+      form.value.minExperience || form.value.maxExperience
+        ? `${form.value.minExperience || "0"} - ${form.value.maxExperience || "0"} Years`
+        : "Not Specified",
+    salary:
+      form.value.minSalary || form.value.maxSalary
+        ? `${form.value.currency ? form.value.currency + " " : ""}${form.value.minSalary || "0"} - ${form.value.maxSalary || "0"} ${form.value.salaryPeriod}`
+        : "Competitive / Not Disclosed",
     description: form.value.description,
     skills: form.value.skills,
   };
@@ -326,7 +323,7 @@ function submitJob() {
 </script>
 
 <template>
-  <div class="w-full space-y-3 pb-8">
+  <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
     <!-- SUCCESS TOAST -->
     <transition
       enter-active-class="transition duration-300 ease-out"
@@ -380,10 +377,12 @@ function submitJob() {
     <!-- =========================================================
          MAIN CARD CONTAINER (Joined Stepper + Form)
     ========================================================== -->
-    <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
-      <!-- HORIZONTAL STEPPER NAVIGATION BAR -->
+    <div
+      class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xs"
+    >
+      <!-- HORIZONTAL STEPPER NAVIGATION BAR (Fixed Top) -->
       <div
-        class="flex items-center justify-between border-b border-slate-200 px-3 py-1"
+        class="shrink-0 sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-3 py-1"
       >
         <!-- Scroll Left Arrow -->
         <button
@@ -406,7 +405,7 @@ function submitJob() {
             :key="step.id"
             type="button"
             @click="currentStep = step.id"
-            class="flex shrink-0 items-center gap-2 border-b-2 px-3.5 py-2.5 text-sm font-semibold transition"
+            class="flex shrink-0 items-center gap-2 border-b-2 px-3.5 py-2.5 text-xs font-semibold transition"
             :class="
               currentStep === step.id
                 ? 'border-[#4338CA] text-[#4338CA]'
@@ -433,52 +432,8 @@ function submitJob() {
         </button>
       </div>
 
-      <!-- FORM CONTENT BODY -->
-      <div class="p-3 sm:p-4">
-        <!-- HEADER BAR (Back Arrow + Icon + Title + Reset Button) -->
-      <div
-        class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-3"
-      >
-        <!-- Left Title Group -->
-        <div class="flex items-center gap-3">
-          <!-- Back button -->
-          <button
-            type="button"
-            @click="emit('back')"
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
-            title="Back to Jobs"
-          >
-            <ArrowLeft class="h-4 w-4" />
-          </button>
-
-          <!-- Icon in Soft Blue/Violet Square -->
-          <div
-            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-indigo-100 bg-indigo-50 text-[#4338CA]"
-          >
-            <Briefcase class="h-5 w-5" />
-          </div>
-
-          <!-- Titles -->
-          <div>
-            <h2 class="text-base font-bold text-slate-900 sm:text-lg">
-              Job Specification
-            </h2>
-            <p class="text-xs text-slate-500">
-              Core details regarding the title, category, role, and availability.
-            </p>
-          </div>
-        </div>
-
-        <!-- Right: Reset Form Button -->
-        <button
-          type="button"
-          @click="resetForm"
-          class="flex items-center gap-2 rounded-xl border border-rose-200 bg-white px-4 py-2 text-xs font-semibold text-rose-500 transition hover:bg-rose-50/70"
-        >
-          <RotateCcw class="h-3.5 w-3.5" />
-          <span>Reset Form</span>
-        </button>
-      </div>
+      <!-- FORM CONTENT BODY (Scrollable Viewport) -->
+      <div class="custom-scroll min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
 
       <!-- =======================================================
            STEP 1: JOB SPECIFICATION 
@@ -488,7 +443,7 @@ function submitJob() {
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <!-- Job Title * -->
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Job Title <span class="text-rose-500">*</span>
             </label>
             <input
@@ -501,7 +456,7 @@ function submitJob() {
 
           <!-- Job Role / Designation -->
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Job Role / Designation
             </label>
             <input
@@ -517,7 +472,7 @@ function submitJob() {
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
           <!-- Job Domain / Industry -->
           <div class="relative">
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Job Domain / Industry
             </label>
             <div class="relative">
@@ -544,7 +499,7 @@ function submitJob() {
 
           <!-- Category -->
           <div class="relative">
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Category
             </label>
             <div class="relative">
@@ -569,7 +524,7 @@ function submitJob() {
 
           <!-- Subcategory -->
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Subcategory
             </label>
             <input
@@ -585,7 +540,7 @@ function submitJob() {
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
           <!-- Department -->
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Department
             </label>
             <input
@@ -598,7 +553,7 @@ function submitJob() {
 
           <!-- Employment Type * -->
           <div class="relative">
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Employment Type <span class="text-rose-500">*</span>
             </label>
             <div class="relative">
@@ -606,6 +561,7 @@ function submitJob() {
                 v-model="form.employmentType"
                 class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-800 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
               >
+                <option value="" disabled selected>Select Employment Type</option>
                 <option
                   v-for="opt in employmentTypes"
                   :key="opt"
@@ -622,7 +578,7 @@ function submitJob() {
 
           <!-- Work Mode * -->
           <div class="relative">
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Work Mode <span class="text-rose-500">*</span>
             </label>
             <div class="relative">
@@ -630,6 +586,7 @@ function submitJob() {
                 v-model="form.workMode"
                 class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-800 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
               >
+                <option value="" disabled selected>Select Work Mode</option>
                 <option
                   v-for="opt in workModes"
                   :key="opt"
@@ -649,7 +606,7 @@ function submitJob() {
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
           <!-- Number of Openings * -->
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Number of Openings <span class="text-rose-500">*</span>
             </label>
             <input
@@ -663,7 +620,7 @@ function submitJob() {
 
           <!-- Min Experience (Years) -->
           <div class="relative">
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Min Experience (Years)
             </label>
             <div class="relative">
@@ -688,7 +645,7 @@ function submitJob() {
 
           <!-- Max Experience (Years) -->
           <div class="relative">
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Max Experience (Years)
             </label>
             <div class="relative">
@@ -714,7 +671,7 @@ function submitJob() {
 
         <!-- ROW 5: Job Description -->
         <div>
-          <label class="mb-1.5 block text-xs font-medium text-slate-700">
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">
             Job Description <span class="text-rose-500">*</span>
           </label>
           <textarea
@@ -727,7 +684,7 @@ function submitJob() {
 
         <!-- ROW 6: Skills & Technologies -->
         <div>
-          <label class="mb-1.5 block text-xs font-medium text-slate-700">
+          <label class="mb-1.5 block text-xs   font-medium text-slate-700">
             Key Skills & Technologies
           </label>
           <div
@@ -771,50 +728,56 @@ function submitJob() {
       <!-- =======================================================
            STEP 2: SALARY & BENEFITS
       ======================================================== -->
-      <div v-show="currentStep === 'salary'" class="mt-6 space-y-6">
+      <div v-show="currentStep === 'salary'" class="space-y-6">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+          <div class="relative">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Currency
             </label>
-            <select
-              v-model="form.currency"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
-            >
-              <option>INR (₹)</option>
-              <option>USD ($)</option>
-              <option>EUR (€)</option>
-              <option>GBP (£)</option>
-            </select>
+            <div class="relative">
+              <select
+                v-model="form.currency"
+                class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-800 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
+              >
+                <option value="" disabled selected>Select Currency</option>
+                <option>INR (₹)</option>
+                <option>USD ($)</option>
+                <option>EUR (€)</option>
+                <option>GBP (£)</option>
+              </select>
+              <ChevronDown
+                class="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              />
+            </div>
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Minimum Salary
             </label>
             <input
               v-model="form.minSalary"
               type="text"
               placeholder="e.g. 12,00,000"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Maximum Salary
             </label>
             <input
               v-model="form.maxSalary"
               type="text"
               placeholder="e.g. 22,00,000"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
             />
           </div>
         </div>
 
         <div>
-          <label class="mb-3 block text-xs font-medium text-slate-700">
+          <label class="mb-3 block text-sm font-medium text-slate-700">
             Perks & Company Benefits
           </label>
           <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -823,7 +786,7 @@ function submitJob() {
               :key="perk"
               type="button"
               @click="togglePerk(perk)"
-              class="flex items-center gap-2 rounded-xl border p-3 text-left text-xs font-medium transition"
+              class="flex items-center gap-2 rounded-xl border p-3 text-left text-sm font-medium transition"
               :class="
                 form.selectedPerks.includes(perk)
                   ? 'border-[#4338CA] bg-indigo-50/50 text-[#4338CA]'
@@ -852,28 +815,28 @@ function submitJob() {
       <!-- =======================================================
            STEP 3: REQUIREMENTS
       ======================================================== -->
-      <div v-show="currentStep === 'requirements'" class="mt-6 space-y-6">
+      <div v-show="currentStep === 'requirements'" class="space-y-6">
         <div>
-          <label class="mb-1.5 block text-xs font-medium text-slate-700">
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">
             Minimum Qualification / Education
           </label>
           <input
             v-model="form.qualification"
             type="text"
             placeholder="e.g. Bachelor's in Computer Science or equivalent"
-            class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+            class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
           />
         </div>
 
         <div>
-          <label class="mb-1.5 block text-xs font-medium text-slate-700">
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">
             Certifications (Optional)
           </label>
           <input
             v-model="form.certifications"
             type="text"
             placeholder="e.g. AWS Certified Developer, CKA, PMP"
-            class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+            class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
           />
         </div>
       </div>
@@ -881,54 +844,54 @@ function submitJob() {
       <!-- =======================================================
            STEP 4: LOCATION
       ======================================================== -->
-      <div v-show="currentStep === 'location'" class="mt-6 space-y-6">
+      <div v-show="currentStep === 'location'" class="space-y-6">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               City
             </label>
             <input
               v-model="form.city"
               type="text"
               placeholder="e.g. Bangalore"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               State / Region
             </label>
             <input
               v-model="form.state"
               type="text"
               placeholder="e.g. Karnataka"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Country
             </label>
             <input
               v-model="form.country"
               type="text"
               placeholder="e.g. India"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
             />
           </div>
         </div>
 
         <div>
-          <label class="mb-1.5 block text-xs font-medium text-slate-700">
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">
             Office Street Address
           </label>
           <input
             v-model="form.address"
             type="text"
             placeholder="e.g. WebArtifacts Hub, Outer Ring Road"
-            class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+            class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
           />
         </div>
       </div>
@@ -936,41 +899,42 @@ function submitJob() {
       <!-- =======================================================
            STEP 5: COMPANY PROFILE
       ======================================================== -->
-      <div v-show="currentStep === 'company'" class="mt-6 space-y-6">
+      <div v-show="currentStep === 'company'" class="space-y-6">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Hiring Manager / Team Lead
             </label>
             <input
               v-model="form.hiringManager"
               type="text"
               placeholder="e.g. VP of Engineering"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Contact Email for Queries
             </label>
             <input
               v-model="form.contactEmail"
               type="email"
               placeholder="e.g. careers@webartifacts.com"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
             />
           </div>
         </div>
 
         <div>
-          <label class="mb-1.5 block text-xs font-medium text-slate-700">
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">
             Company Overview for this Post
           </label>
           <textarea
             v-model="form.companyOverview"
             rows="3"
-            class="w-full rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+            placeholder="e.g. Building digital experiences for a better tomorrow. High-growth tech consulting and product engineering..."
+            class="w-full rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
           ></textarea>
         </div>
       </div>
@@ -978,8 +942,8 @@ function submitJob() {
       <!-- =======================================================
            STEP 6: OFFICE FACILITIES
       ======================================================== -->
-      <div v-show="currentStep === 'facilities'" class="mt-6 space-y-6">
-        <p class="text-xs text-slate-500">
+      <div v-show="currentStep === 'facilities'" class="space-y-6">
+        <p class="text-sm text-slate-500">
           Highlight key on-campus amenities available for employees.
         </p>
 
@@ -1007,7 +971,7 @@ function submitJob() {
               <component :is="facility.icon" class="h-5 w-5" />
             </div>
             <div>
-              <p class="text-xs font-bold">{{ facility.id }}</p>
+              <p class="text-sm font-bold">{{ facility.id }}</p>
               <p class="text-[11px] text-slate-400">Available at site</p>
             </div>
           </button>
@@ -1017,55 +981,55 @@ function submitJob() {
       <!-- =======================================================
            STEP 7: SHIFT & TRAVEL
       ======================================================== -->
-      <div v-show="currentStep === 'shift'" class="mt-6 space-y-6">
+      <div v-show="currentStep === 'shift'" class="space-y-6">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Shift Timing
             </label>
             <input
               v-model="form.shiftTiming"
               type="text"
               placeholder="e.g. Day Shift (9:30 AM - 6:30 PM)"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Working Days
             </label>
             <input
               v-model="form.workingDays"
               type="text"
               placeholder="e.g. Monday to Friday (5 Days)"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
             />
           </div>
         </div>
 
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Travel Requirement
             </label>
             <input
               v-model="form.travelRequirement"
               type="text"
               placeholder="e.g. No Travel Required"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium text-slate-700">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
               Overtime / Weekend Policy
             </label>
             <input
               v-model="form.overtimePolicy"
               type="text"
               placeholder="e.g. Compensatory Offs Available"
-              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none focus:border-[#4338CA]"
+              class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#4338CA] focus:ring-2 focus:ring-indigo-100"
             />
           </div>
         </div>

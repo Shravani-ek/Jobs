@@ -130,7 +130,7 @@ function handleSubmit() {
            LEFT : REVIEW REGISTRATION
       ========================================== -->
       <div
-        class="review-submit-scroll min-h-0 overflow-y-auto rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+        class="review-submit-scroll h-full min-h-0 overflow-y-auto rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
       >
 
         <!-- Header -->
@@ -299,7 +299,7 @@ function handleSubmit() {
       <!-- =========================================
            RIGHT : LIVE CARD PREVIEW
       ========================================== -->
-      <aside class="min-h-0 min-w-0 overflow-hidden">
+      <aside class="review-submit-scroll h-full min-h-0 min-w-0 overflow-y-auto pr-1">
         <CompanyPreview
           company-name="fSDSAF"
           industry="Software & IT Services"

@@ -171,7 +171,7 @@ const securityItems = [
       ====================================================== -->
 
       <section
-        class="legal-tax-scroll min-h-0 overflow-y-auto rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+        class="legal-tax-scroll h-full min-h-0 overflow-y-auto rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
       >
 
         <!-- HEADER -->
@@ -417,7 +417,7 @@ const securityItems = [
            RIGHT : LIVE CARD PREVIEW
       ====================================================== -->
 
-      <aside class="min-h-0 min-w-0 overflow-hidden space-y-4">
+      <aside class="legal-tax-scroll h-full min-h-0 min-w-0 overflow-y-auto space-y-4 pr-1">
         <CompanyPreview
           :company-name="companyName"
           :industry="industry"
