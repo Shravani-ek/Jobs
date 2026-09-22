@@ -60,7 +60,7 @@ const internshipMeta = computed(() => [
   <div
     class="group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-2 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md border border-brand-light transition-shadow duration-150"
   >
-    <div class="flex items-start justify-between gap-3">
+    <div class="flex items-start justify-between gap-2">
       <div class="min-w-0 flex-1">
         <h2 class="text-sm font-semibold leading-5 text-grey-900">
           {{ job.title }}
@@ -70,7 +70,7 @@ const internshipMeta = computed(() => [
           {{ job.company }}
         </p>
 
-        <div v-if="isInternship" class="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-700">
+        <div v-if="isInternship" class="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-700">
           <div
             v-for="(item, index) in internshipMeta"
             :key="`${item.label}-${index}`"

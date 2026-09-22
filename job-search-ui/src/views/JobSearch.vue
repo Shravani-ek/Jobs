@@ -318,7 +318,7 @@ function handleApply(job: Job) {
 
                   <div class="mt-2">
                     <div v-if="activeActivitySection === 'saved'">
-                      <div v-if="savedJobs.length" class="space-y-3">
+                      <div v-if="savedJobs.length" class="space-y-2">
                         <JobCard
                           v-for="job in savedJobs"
                           :key="job.title"
@@ -336,7 +336,7 @@ function handleApply(job: Job) {
                     </div>
 
                     <div v-if="activeActivitySection === 'applied'">
-                      <div v-if="appliedJobs.length" class="space-y-3">
+                      <div v-if="appliedJobs.length" class="space-y-2">
                         <JobCard
                           v-for="job in appliedJobs"
                           :key="job.title"
@@ -363,7 +363,7 @@ function handleApply(job: Job) {
                 </div>
               </template>
               <template v-else>
-                <div class="space-y-3">
+                <div class="space-y-2">
                   <JobCard
                     v-for="job in visibleJobs"
                     :key="job.title"
@@ -392,7 +392,7 @@ function handleApply(job: Job) {
               class="h-full min-h-0 overflow-y-auto pr-0.5"
               style="scrollbar-width:none; -ms-overflow-style:none;"
             >
-              <div class="space-y-3">
+              <div class="space-y-2">
                 <JobCard
                   v-for="job in visibleJobs"
                   :key="job.title"
