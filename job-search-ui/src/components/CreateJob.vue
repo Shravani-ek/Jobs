@@ -1863,26 +1863,28 @@ function submitJob() {
         </div>
       </div>
 
+      </div>
+
       <!-- =======================================================
-           BOTTOM ACTIONS BAR (Previous / Save Draft / Next)
+           BOTTOM ACTIONS BAR (Previous / Save Draft / Next - Fixed Bottom)
       ======================================================== -->
       <div
-        class="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-5"
+        class="shrink-0 flex items-center justify-between gap-3 border-t border-slate-200 bg-white px-4 sm:px-6 py-2.5 rounded-b-lg shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-10"
       >
         <button
           type="button"
           @click="goToPrevStep"
-          class="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 cursor-pointer"
         >
           <ArrowLeft class="h-3.5 w-3.5" />
           <span>{{ currentStep === "details" ? "Back to Jobs" : "Previous Step" }}</span>
         </button>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2.5">
           <button
             type="button"
             @click="resetForm"
-            class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+            class="rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 cursor-pointer"
           >
             Clear Fields
           </button>
@@ -1890,7 +1892,7 @@ function submitJob() {
           <button
             type="button"
             @click="submitJob"
-            class="flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-xs font-semibold text-[#4338CA] transition hover:bg-indigo-100"
+            class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/80 px-3.5 py-2 text-xs font-semibold text-[#4338CA] transition hover:bg-indigo-100 cursor-pointer"
           >
             <span>Save Draft</span>
           </button>
@@ -1898,7 +1900,7 @@ function submitJob() {
           <button
             type="button"
             @click="goToNextStep"
-            class="flex items-center gap-2 rounded-xl bg-[#4338CA] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-indigo-700"
+            class="inline-flex items-center gap-1.5 rounded-lg bg-[#4338CA] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-indigo-700 cursor-pointer"
           >
             <span>
               {{
@@ -1907,10 +1909,9 @@ function submitJob() {
                   : "Next Step"
               }}
             </span>
-            <ChevronRight class="h-4 w-4" />
+            <ChevronRight class="h-3.5 w-3.5" />
           </button>
         </div>
-      </div>
       </div>
     </div>
   </div>

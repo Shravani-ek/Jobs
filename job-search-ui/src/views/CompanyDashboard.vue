@@ -720,7 +720,7 @@ function handleProfileRemoved() {
 
       <div
         class="min-h-0 flex-1"
-        :class="activeDashboardTab === 'Create Job' ? 'overflow-hidden' : 'flex flex-col'"
+        :class="activeDashboardTab === 'Create Job' ? 'overflow-hidden flex flex-col h-full' : 'flex flex-col'"
       >
 
 <!-- =================================================
