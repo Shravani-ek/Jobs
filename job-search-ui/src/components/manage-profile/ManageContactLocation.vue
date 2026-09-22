@@ -53,7 +53,9 @@ const indianStates = [
 </script>
 
 <template>
-  <section class="p-5 sm:p-6 pb-0 sm:pb-0">
+  <section
+    class="custom-scroll h-full min-h-0 overflow-y-auto p-5 sm:p-6"
+  >
     <!-- Form Content -->
     <div class="space-y-5">
       <!-- Contact Details -->
@@ -196,24 +198,24 @@ const indianStates = [
         </div>
       </div>
 
-      <!-- Action Buttons (Sticky Fixed at Bottom) -->
-      <div class="sticky bottom-0 z-10 mt-4 -mx-5 sm:-mx-6 flex items-center justify-between border-t border-slate-200 bg-white px-4 sm:px-6 py-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] rounded-b-lg">
+      <!-- Action Buttons -->
+      <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
         <button
           type="button"
           @click="emit('back')"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 cursor-pointer"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50"
         >
-          <ArrowLeft class="h-3.5 w-3.5" />
+          <ArrowLeft class="h-4 w-4" />
           <span>Back</span>
         </button>
 
         <button
           type="button"
           @click="emit('continue')"
-          class="inline-flex items-center gap-1.5 rounded-lg bg-[#4F46E5] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#4338CA] focus:outline-none focus:ring-2 focus:ring-indigo-200 cursor-pointer"
+          class="inline-flex items-center gap-2 rounded-lg bg-[#4F46E5] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4338CA] focus:outline-none focus:ring-2 focus:ring-indigo-200"
         >
           <span>Save &amp; Continue</span>
-          <ArrowRight class="h-3.5 w-3.5" />
+          <ArrowRight class="h-4 w-4" />
         </button>
       </div>
     </div>

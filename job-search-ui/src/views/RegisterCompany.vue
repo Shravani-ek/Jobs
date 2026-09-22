@@ -122,7 +122,7 @@ function saveAndExit() {
 </script>
 
 <template>
-  <div class="fixed inset-0 flex flex-col overflow-hidden bg-slate-50 text-slate-900">
+  <div class="flex h-screen flex-col overflow-hidden bg-slate-50 text-slate-900">
 
     <!-- =====================================
          EXISTING NAVBAR
@@ -141,7 +141,7 @@ function saveAndExit() {
       ====================================== -->
 
       <section
-        class="mt-3 shrink-0 rounded-lg border border-slate-200 bg-white px-4 py-2.5 shadow-sm"
+        class="mt-3 rounded-lg border border-slate-200 bg-white px-4 py-2.5 shadow-sm"
       >
         <div class="flex items-center gap-4 lg:gap-6">
           <button
@@ -203,7 +203,7 @@ function saveAndExit() {
 
       <div class="mt-3 min-h-0 flex-1 overflow-hidden">
 
-      <div v-if="currentStep === 1" class="grid h-full min-h-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2.2fr)_minmax(320px,1fr)]">
+      <div v-if="currentStep === 1" class="grid h-full min-h-0 grid-cols-1 gap-4 xl:grid-cols-[minmax(0,2.2fr)_minmax(320px,1fr)]">
 
         <!-- =====================================
              LEFT FORM

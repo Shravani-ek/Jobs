@@ -164,7 +164,7 @@ const securityItems = [
 
 <template>
   <div class="flex h-full min-h-0 w-full flex-1 overflow-hidden bg-slate-50">
-    <div class="grid h-full min-h-0 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div class="grid h-full min-h-0 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_380px]">
 
       <!-- =====================================================
            LEFT : LEGAL & TAX FORM

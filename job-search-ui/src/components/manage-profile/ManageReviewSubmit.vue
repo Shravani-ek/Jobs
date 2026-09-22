@@ -30,7 +30,9 @@ const agreementAccepted = ref(true);
 </script>
 
 <template>
-  <section class="p-5 sm:p-6 pb-0 sm:pb-0">
+  <section
+    class="custom-scroll h-full min-h-0 overflow-y-auto p-5 sm:p-6"
+  >
     <div class="space-y-5">
       <!-- Summary Grid -->
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -158,14 +160,14 @@ const agreementAccepted = ref(true);
         </label>
       </div>
 
-      <!-- Action Buttons (Sticky Fixed at Bottom) -->
-      <div class="sticky bottom-0 z-10 mt-4 -mx-5 sm:-mx-6 flex items-center justify-between border-t border-slate-200 bg-white px-4 sm:px-6 py-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] rounded-b-lg">
+      <!-- Action Buttons -->
+      <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
         <button
           type="button"
           @click="emit('back')"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 cursor-pointer"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50"
         >
-          <ArrowLeft class="h-3.5 w-3.5" />
+          <ArrowLeft class="h-4 w-4" />
           <span>Back</span>
         </button>
 
@@ -173,9 +175,9 @@ const agreementAccepted = ref(true);
           type="button"
           :disabled="!agreementAccepted"
           @click="emit('submit')"
-          class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <CheckCircle2 class="h-3.5 w-3.5" />
+          <CheckCircle2 class="h-4 w-4" />
           <span>Save &amp; Publish Profile</span>
         </button>
       </div>
