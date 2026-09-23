@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import { computed, ref, reactive, onMounted } from "vue";
+import { computed, ref, reactive, onMounted, nextTick } from "vue";
 import { useRoute } from "vue-router";
 
 import Navbar from "../components/Navbar.vue";
@@ -28,8 +28,17 @@ import {
   Send,
   Trash2,
   Users,
-  Pencil,
-  MoreVertical,
+  SquarePen,
+  PanelLeftClose,
+  PanelLeft,
+  ChevronUp,
+  Globe,
+  Calendar,
+  Home,
+  Info,
+  Briefcase,
+  Heart,
+  Check,
 } from "lucide-vue-next";
 
 const route = useRoute();
@@ -43,38 +52,20 @@ const props = defineProps<{
 ========================================================= */
 
 const company = reactive({
-  name: "ADS",
-  shortName: "AD",
+  name: "WebArtifacts",
+  shortName: "WA",
+  tagline: "Building modern digital experiences",
   headline: "WE ARE A TECHNOLOGY-FOCUSED COMPANY COMMITTED TO DELIVERING INNOVATIVE DIGITAL SOLUTIONS...",
   description: "We are a technology-focused company committed to delivering innovative digital solutions that help businesses grow and improve their operations. We provide reliable software and cloud architectures.",
   location: "Pune, Maharashtra, India",
-  website: "https://ads.tech",
+  website: "https://www.webartifacts.com",
+  websiteDisplay: "www.webartifacts.com",
   industry: "Software & IT Services",
   size: "11-50 employees",
   foundedYear: "2026",
   verified: true,
   companyCount: 2,
 });
-
-const featuredSlides = ref([
-  {
-    author: "nava",
-    time: "7 days",
-    title: "What is Software Testing?",
-    snippet: "🧪 Software Testing ensures that applications are reliable, secure, and found before release improves the user experience...",
-    tag: "SOFTWARE TESTING",
-  },
-  {
-    author: "nava",
-    time: "3 days",
-    title: "Cloud Infrastructure & Scale",
-    snippet: "⚡ Modern cloud architectures ensure 99.99% reliability, automated failover, and microsecond latency for global workloads...",
-    tag: "CLOUD ARCHITECTURE",
-  },
-]);
-
-const currentFeaturedSlide = ref(0);
-const showPostCardMenu = ref(true);
 
 /* =========================================================
    JOB DATA
@@ -107,11 +98,16 @@ onMounted(() => {
   }
 });
 
+const isSidebarHovered = ref(false);
+const isSidebarPinned = ref(false);
+const isExpanded = computed(() => isSidebarHovered.value || isSidebarPinned.value);
+
 const dashboardTabs = computed(() => [
   {
     id: "Manage Jobs",
-    label: `Manage Jobs (${jobs.value.length})`,
+    label: "Manage Jobs",
     icon: BriefcaseBusiness,
+    badge: jobs.value.length,
   },
   {
     id: "Create Job",
@@ -130,10 +126,57 @@ const dashboardTabs = computed(() => [
   },
   {
     id: "Post",
-    label: "Post",
-    icon: Plus,
+    label: "Post & Updates",
+    icon: Send,
+    badge: companyPosts.value.length > 0 ? companyPosts.value.length : undefined,
   },
 ]);
+
+
+const showHeroCard = computed(() => {
+  return !["Manage Jobs", "Create Job", "Post"].includes(activeDashboardTab.value);
+});
+
+const heroTabs = [
+  { id: "overview", label: "Overview", icon: Home },
+  { id: "about", label: "About", icon: Info },
+  { id: "services", label: "Services", icon: LayoutGrid },
+  { id: "jobs", label: "Jobs", icon: Briefcase },
+  { id: "team", label: "Team", icon: Users },
+  { id: "culture", label: "Culture", icon: Heart },
+];
+
+const activeHeroTab = ref("overview");
+
+function selectHeroTab(tabId: string) {
+  activeHeroTab.value = tabId;
+  if (tabId === "jobs") {
+    activeDashboardTab.value = "Manage Jobs";
+  } else if (tabId === "overview") {
+    activeDashboardTab.value = "Manage Business";
+    nextTick(() => {
+      const el = document.getElementById("section-about");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  } else {
+    if (activeDashboardTab.value !== "Manage Business") {
+      activeDashboardTab.value = "Manage Business";
+    }
+    nextTick(() => {
+      const targetMap: Record<string, string> = {
+        about: "section-about",
+        services: "section-services",
+        team: "section-team",
+        culture: "section-culture",
+      };
+      const targetId = targetMap[tabId];
+      if (targetId) {
+        const el = document.getElementById(targetId);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
+}
 
 /* =========================================================
    JOB FILTERS
@@ -306,7 +349,7 @@ const handleJobCreated = (newJob: any) => {
     location: newJob.location,
     type: newJob.type,
     applications: 0,
-    status: "Active",
+    status: newJob.status || "Active",
     posted: "Just now",
   });
   activeDashboardTab.value = "Manage Jobs";
@@ -354,311 +397,330 @@ function handleProfileRemoved() {
 </script>
 
 <template>
-  <div class="flex h-screen flex-col overflow-hidden bg-[#f5f8fc] text-slate-800">
+  <div class="fixed inset-0 flex flex-col overflow-hidden bg-[#f5f8fc] text-slate-800">
 
     <!-- =====================================================
          TOP NAVBAR
     ====================================================== -->
-
     <Navbar :show-secondary="false" />
+
+    <!-- =====================================================
+         DASHBOARD BODY (Below Navbar, aligned with NxtTurn logo)
+    ====================================================== -->
+    <div class="flex-1 flex min-h-0 max-w-7xl mx-auto w-full px-6 pt-3 pb-3 gap-3 relative overflow-hidden">
+
+      <!-- ===================================================
+           HOVER-EXPANDABLE LEFT SIDEBAR (Directly Below NxtTurn Logo)
+      ==================================================== -->
+      <aside
+        @mouseenter="isSidebarHovered = true"
+        @mouseleave="isSidebarHovered = false"
+        class="z-30 flex h-full flex-col rounded-lg border border-slate-200 bg-white transition-all duration-300 ease-in-out select-none shadow-xs"
+        :class="[
+          isExpanded ? 'w-64 shadow-2xl' : 'w-16',
+          isSidebarPinned ? 'relative' : 'absolute left-6 top-3 bottom-3'
+        ]"
+      >
+        <!-- Top Window Dots + Pin Toggle -->
+        <div class="flex items-center justify-between px-3.5 pt-3 pb-2">
+
+          <button
+            v-if="isExpanded"
+            type="button"
+            @click="isSidebarPinned = !isSidebarPinned"
+            class="text-slate-400 hover:text-slate-700 p-1 rounded-md hover:bg-slate-100 transition cursor-pointer"
+            :title="isSidebarPinned ? 'Unpin sidebar (collapse to icons)' : 'Pin sidebar open'"
+          >
+            <PanelLeftClose v-if="isSidebarPinned" class="h-4 w-4" />
+            <PanelLeft v-else class="h-4 w-4" />
+          </button>
+        </div>
+
+        <!-- User / Company Header -->
+        <div class="flex items-center px-3 py-2 border-b border-slate-100">
+          <div class="flex items-center gap-2.5 min-w-0 flex-1" :class="isExpanded ? '' : 'justify-center'">
+            <div
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] via-indigo-600 to-cyan-500 text-xs font-black text-white shadow-sm shadow-blue-500/20 select-none"
+            >
+              {{ company.shortName || 'WA' }}
+            </div>
+
+            <div v-if="isExpanded" class="min-w-0 flex-1 overflow-hidden transition-opacity duration-200">
+              <div class="flex items-center gap-1">
+                <span class="text-xs font-bold text-slate-900 truncate">{{ company.name || 'WebArtifacts' }}</span>
+                <CheckCircle2 class="h-3.5 w-3.5 text-blue-600 shrink-0" />
+              </div>
+              <p class="text-[10px] text-slate-400 truncate font-medium">Employer Portal</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Button (Create Job) -->
+        <div class="px-2.5 py-2.5">
+          <button
+            v-if="isExpanded"
+            type="button"
+            @click="createJob"
+            class="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-blue-50 hover:border-blue-200 hover:text-[#2563EB] px-3 py-2.5 text-xs font-bold text-slate-700 shadow-2xs transition cursor-pointer"
+          >
+            <SquarePen class="h-4 w-4 text-slate-600 group-hover:text-[#2563EB]" />
+            <span>Create Job</span>
+          </button>
+
+          <button
+            v-else
+            type="button"
+            @click="createJob"
+            class="flex h-9 w-9 mx-auto items-center justify-center rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-200 hover:text-[#2563EB] text-slate-700 shadow-2xs transition cursor-pointer"
+            title="Create Job"
+          >
+            <SquarePen class="h-4 w-4" />
+          </button>
+        </div>
+
+        <!-- Main Navigation Items -->
+        <nav class="space-y-1 px-2 flex-1 overflow-y-auto" style="scrollbar-width:none;-ms-overflow-style:none;">
+          <button
+            v-for="tab in dashboardTabs"
+            :key="tab.id"
+            type="button"
+            @click="selectDashboardTab(tab)"
+            class="group relative flex w-full items-center rounded-lg transition-colors cursor-pointer"
+            :class="[
+              isExpanded ? 'px-2.5 py-2' : 'h-10 justify-center',
+              activeDashboardTab === tab.id
+                ? 'text-[#2563EB] font-bold bg-blue-50/70'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
+            ]"
+            :title="!isExpanded ? tab.label : ''"
+          >
+            <!-- Blue Active Indicator Bar on left edge (matching screenshot) -->
+            <span
+              v-if="activeDashboardTab === tab.id"
+              class="absolute left-0 top-1 bottom-1 w-1 rounded-r bg-[#2563EB]"
+            />
+
+            <!-- Icon -->
+            <component
+              :is="tab.icon"
+              class="h-4 w-4 shrink-0 transition-colors"
+              :class="[
+                activeDashboardTab === tab.id ? 'text-[#2563EB]' : 'text-slate-400 group-hover:text-slate-600',
+                isExpanded ? 'mr-3' : 'mx-auto'
+              ]"
+            />
+
+            <!-- Label -->
+            <span v-if="isExpanded" class="flex-1 text-left text-xs truncate">
+              {{ tab.label }}
+            </span>
+
+            <!-- Badge (e.g. blue pill badge with count) -->
+            <template v-if="isExpanded">
+              <span
+                v-if="tab.badge !== undefined"
+                class="ml-auto rounded-md px-2 py-0.5 text-[10px] font-bold"
+                :class="activeDashboardTab === tab.id ? 'bg-[#2563EB] text-white' : 'bg-slate-100 text-slate-600'"
+              >
+                {{ tab.badge }}
+              </span>
+            </template>
+            <template v-else>
+              <span
+                v-if="tab.badge !== undefined && tab.badge > 0"
+                class="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-[#2563EB]"
+              />
+            </template>
+          </button>
+
+          <!-- Collapsible Section: ACCOUNTS & SWITCH (matching RECENT CHATS in screenshot) -->
+          <div v-if="isExpanded" class="mt-4 pt-3 pb-2 border-t border-slate-100">
+            <div class="flex items-center justify-between px-2 pb-1.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Accounts
+              </span>
+              <ChevronUp class="h-3 w-3 text-slate-400" />
+            </div>
+
+            <button
+              type="button"
+              class="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition cursor-pointer"
+            >
+              <PlusCircle class="h-3.5 w-3.5" />
+              <span>Switch / Add Account</span>
+            </button>
+
+            <div class="mt-1 flex items-center justify-between rounded-lg p-2 hover:bg-slate-50 transition">
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white shrink-0">
+                  WA
+                </div>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-slate-800 truncate">{{ company.name || 'WebArtifacts' }}</p>
+                  <p class="text-[10px] text-slate-400">Primary (1)</p>
+                </div>
+              </div>
+              <span class="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+            </div>
+          </div>
+        </nav>
+
+        <!-- Collapsed Bottom Switch Account Button -->
+        <div v-if="!isExpanded" class="p-2 border-t border-slate-100 flex flex-col items-center gap-2">
+          <button
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition cursor-pointer"
+            title="Switch Account (1)"
+          >
+            <Building2 class="h-4 w-4" />
+          </button>
+        </div>
+      </aside>
+
+      <!-- Placeholder spacer for collapsed sidebar width (64px) when sidebar is floating/unpinned -->
+      <div v-if="!isSidebarPinned" class="w-16 shrink-0" />
 
       <!-- ===================================================
            MAIN CONTENT
       ==================================================== -->
-
-      <main class="mt-1 mx-auto flex min-h-0 w-full max-w-[1260px] flex-1 flex-col px-3 py-2">
+      <main
+        class="flex-1 min-h-0 flex flex-col pr-1 scrollbar-hide"
+        :class="activeDashboardTab === 'Create Job' ? 'overflow-hidden' : 'overflow-y-auto'"
+      >
 
         <!-- =================================================
-             COMPANY HERO
+             HERO BANNER (SCROLLS UP WITH PAGE)
         ================================================== -->
-
-        <section
-          class="relative shrink-0 overflow-hidden rounded-lg border border-slate-200/80 bg-[#fbfcfe] shadow-xs"
-          style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px;"
+        <div
+          v-if="showHeroCard"
+          class="shrink-0 relative overflow-hidden border-slate-200/80 bg-slate-900 min-h-[200px] sm:min-h-[280px] md:min-h-[300px] flex items-center shadow-xs select-none"
+          :class="activeDashboardTab === 'Manage Business' ? 'rounded-t-lg border-x border-t' : 'rounded-lg border mb-2'"
+          style="background-image: url('/images/office-banner.jpg'); background-size: cover; background-position: center;"
         >
-          <!-- TOP MAIN CONTENT (Left: Info, Right: Featured Post Card) -->
-          <div class="px-4 py-3 sm:px-6 sm:py-3.5">
-            <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,1fr)] gap-4 lg:gap-6 items-center">
-              
-              <!-- LEFT COLUMN: Brand, Name, Headline, Bio -->
-              <div class="flex flex-col justify-center">
-                <!-- Top row: Logo + Name & Verification -->
-                <div class="flex items-center gap-3 sm:gap-4">
-                  <!-- Logo Icon -->
-                  <div
-                    class="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] text-base sm:text-lg font-black text-white shadow-md shadow-blue-500/20 select-none"
-                  >
-                    {{ company.shortName || 'AD' }}
-                  </div>
+          <!-- Atmospheric Gradient Overlay (Deep Navy fading left-to-right) -->
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-[#0d1b36]/95 via-[#142647]/85 via-50% to-[#142647]/10"
+          />
 
-                  <!-- Name -->
-                  <h1 class="text-2xl sm:text-2xl font-black tracking-tight text-slate-900 uppercase leading-none">
-                    {{ company.name || 'ADS' }}
-                  </h1>
-                </div>
-
-                <!-- Mission Headline -->
-                <h2 class="mt-2 text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight leading-snug line-clamp-1">
-                  {{ company.headline || 'WE ARE A TECHNOLOGY-FOCUSED COMPANY COMMITTED TO DELIVERING INNOVATIVE DIGITA...' }}
-                </h2>
-
-                <!-- Subtitle / Bio Paragraph -->
-                <p class="mt-1 text-[11px] sm:text-xs text-slate-600 leading-relaxed max-w-2xl line-clamp-2">
-                  {{ company.description || 'We are a technology-focused company committed to delivering innovative digital solutions that help businesses grow and improve their operations. We provide r...' }}
-                </p>
-              </div>
-
-              <!-- RIGHT COLUMN: Dark Floating Post / Announcement Card -->
-              <div class="relative w-full max-w-sm mx-auto lg:max-w-none">
-                <div class="relative rounded-lg bg-[#0b1220] border border-slate-700/60 p-2.5 sm:p-3 text-white shadow-md overflow-hidden">
-                  
-                  <!-- Post Header Info & Dropdown Menu -->
-                  <div class="flex items-start justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                      <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-600 text-[10px] font-bold text-white shadow-xs">
-                        N
-                      </div>
-                      <div class="flex items-center gap-1.5 text-xs leading-none">
-                        <span class="font-bold text-slate-200 text-xs">{{ featuredSlides[currentFeaturedSlide]?.author || 'nava' }}</span>
-                        <span class="text-[10px] text-slate-400">• {{ featuredSlides[currentFeaturedSlide]?.time || '7 days' }}</span>
-                      </div>
-                    </div>
-
-                    <!-- Floating Action Menu (Edit / Delete) -->
-                    <div class="relative">
-                      <button
-                        type="button"
-                        @click="showPostCardMenu = !showPostCardMenu"
-                        class="flex h-5 w-5 items-center justify-center rounded text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
-                        title="Post options"
-                      >
-                        <MoreVertical class="h-3.5 w-3.5" />
-                      </button>
-
-                      <!-- Menu Popover -->
-                      <div
-                        v-if="showPostCardMenu"
-                        class="absolute right-0 top-6 z-20 w-28 rounded-lg border border-slate-700/80 bg-[#162032]/95 backdrop-blur-md p-1 shadow-xl text-xs"
-                      >
-                        <button
-                          type="button"
-                          @click="showPostModal = true; showPostCardMenu = false"
-                          class="flex w-full items-center gap-1.5 rounded px-2 py-1 text-[11px] font-medium text-slate-200 hover:bg-slate-700/60 hover:text-white transition cursor-pointer"
-                        >
-                          <Pencil class="h-3 w-3 text-emerald-400" />
-                          <span>Edit Post</span>
-                        </button>
-                        <button
-                          type="button"
-                          @click="showPostCardMenu = false"
-                          class="flex w-full items-center gap-1.5 rounded px-2 py-1 text-[11px] font-medium text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition cursor-pointer"
-                        >
-                          <Trash2 class="h-3 w-3 text-rose-400" />
-                          <span>Delete Post</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Post Snippet Content -->
-                  <div class="mt-1.5">
-                    <p class="text-[11px] font-semibold text-slate-200 leading-tight">
-                      {{ featuredSlides[currentFeaturedSlide]?.title || 'What is Software Testing?' }}
-                    </p>
-                    <p class="mt-0.5 text-[10px] text-slate-400 line-clamp-1 leading-tight">
-                      {{ featuredSlides[currentFeaturedSlide]?.snippet || '🧪 Software Testing ensures that applications are reliable, secure, and found before release improves the user experience...' }}
-                    </p>
-                  </div>
-
-                  <!-- Visual Graphic Banner (Software Testing Network Blueprint) -->
-                  <div class="mt-2 relative rounded-md overflow-hidden bg-[#070d19] border border-cyan-950/60 shadow-inner">
-                    <svg
-                      class="w-full h-20 sm:h-22 object-cover"
-                      viewBox="0 0 400 100"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <!-- Deep cyber background glow -->
-                      <defs>
-                        <radialGradient id="cyberGlow" cx="50%" cy="50%" r="50%">
-                          <stop offset="0%" stop-color="#0284c7" stop-opacity="0.35" />
-                          <stop offset="100%" stop-color="#070d19" stop-opacity="0" />
-                        </radialGradient>
-                        <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stop-color="#38bdf8" />
-                          <stop offset="100%" stop-color="#0284c7" />
-                        </linearGradient>
-                        <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stop-color="#0284c7" stop-opacity="0.2" />
-                          <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.8" />
-                          <stop offset="100%" stop-color="#0284c7" stop-opacity="0.2" />
-                        </linearGradient>
-                      </defs>
-
-                      <rect width="400" height="100" fill="#070d19" />
-                      <circle cx="200" cy="50" r="55" fill="url(#cyberGlow)" />
-
-                      <!-- Background city / server rack subtle silhouette -->
-                      <g opacity="0.15" stroke="#38bdf8" stroke-width="0.5">
-                        <line x1="20" y1="85" x2="380" y2="85" />
-                        <line x1="50" y1="15" x2="50" y2="85" />
-                        <line x1="120" y1="25" x2="120" y2="85" />
-                        <line x1="280" y1="20" x2="280" y2="85" />
-                        <line x1="350" y1="30" x2="350" y2="85" />
-                      </g>
-
-                      <!-- Connecting Circuit Traces -->
-                      <g stroke="url(#lineGrad)" stroke-width="1.2">
-                        <line x1="200" y1="28" x2="120" y2="24" />
-                        <line x1="200" y1="72" x2="115" y2="76" />
-                        <line x1="200" y1="28" x2="280" y2="24" />
-                        <line x1="200" y1="72" x2="285" y2="76" />
-                        <line x1="172" y1="50" x2="70" y2="50" />
-                        <line x1="228" y1="50" x2="330" y2="50" />
-                      </g>
-
-                      <!-- Glow Dots on Lines -->
-                      <circle cx="155" cy="26" r="2" fill="#38bdf8" />
-                      <circle cx="245" cy="26" r="2" fill="#38bdf8" />
-                      <circle cx="150" cy="74" r="2" fill="#38bdf8" />
-                      <circle cx="250" cy="74" r="2" fill="#38bdf8" />
-
-                      <!-- Outer Hex Node 1 (Top Left: Server) -->
-                      <polygon points="120,16 130,22 130,34 120,40 110,34 110,22" stroke="#0284c7" stroke-width="1.2" fill="#0f172a" />
-                      <path d="M115 26h10 M115 30h10" stroke="#38bdf8" stroke-width="1" stroke-linecap="round" />
-
-                      <!-- Outer Hex Node 2 (Bottom Left: Security) -->
-                      <polygon points="115,68 125,74 125,86 115,92 105,86 105,74" stroke="#0284c7" stroke-width="1.2" fill="#0f172a" />
-                      <path d="M115 76v8 M111 78c0 4 4 6 4 6s4-2 4-6v-2l-4-1-4 1z" stroke="#38bdf8" stroke-width="1" fill="none" />
-
-                      <!-- Outer Hex Node 3 (Top Right: Globe) -->
-                      <polygon points="280,16 290,22 290,34 280,40 270,34 270,22" stroke="#0284c7" stroke-width="1.2" fill="#0f172a" />
-                      <circle cx="280" cy="28" r="4.5" stroke="#38bdf8" stroke-width="1" fill="none" />
-
-                      <!-- Outer Hex Node 4 (Bottom Right: Touch) -->
-                      <polygon points="285,68 295,74 295,86 285,92 275,86 275,74" stroke="#0284c7" stroke-width="1.2" fill="#0f172a" />
-                      <rect x="282" y="76" width="6" height="9" rx="1" stroke="#38bdf8" stroke-width="1" fill="none" />
-
-                      <!-- Central Main Hexagon -->
-                      <polygon
-                        points="200,20 228,36 228,64 200,80 172,64 172,36"
-                        stroke="url(#hexGrad)"
-                        stroke-width="2"
-                        fill="#0c182b"
-                        filter="drop-shadow(0 0 6px rgba(56,189,248,0.5))"
-                      />
-
-                      <!-- Center Text inside Hexagon -->
-                      <text x="200" y="47" text-anchor="middle" fill="#ffffff" font-size="8.5" font-family="system-ui, sans-serif" font-weight="900" letter-spacing="1">
-                        SOFTWARE
-                      </text>
-                      <text x="200" y="58" text-anchor="middle" fill="#38bdf8" font-size="7.5" font-family="system-ui, sans-serif" font-weight="800" letter-spacing="1.2">
-                        TESTING
-                      </text>
-                    </svg>
-                  </div>
-
-                  <!-- Carousel Indicators (bottom center) -->
-                  <div class="mt-1.5 flex items-center justify-center gap-1.5">
-                    <button
-                      type="button"
-                      @click="currentFeaturedSlide = 0"
-                      class="h-1 rounded-full transition-all cursor-pointer"
-                      :class="currentFeaturedSlide === 0 ? 'w-1 bg-slate-400' : 'w-4 bg-blue-500'"
-                      title="Slide 1"
-                    ></button>
-                    <button
-                      type="button"
-                      @click="currentFeaturedSlide = 1"
-                      class="h-1 rounded-full transition-all cursor-pointer"
-                      :class="currentFeaturedSlide === 1 ? 'w-1 bg-slate-400' : 'w-4 bg-blue-500'"
-                      title="Slide 2"
-                    ></button>
-                  </div>
-
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- BOTTOM META ROW -->
-          <div class="border-t border-slate-200/70 bg-white/70 px-4 sm:px-6 py-2 sm:py-2.5">
-            <div class="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-xs font-semibold text-slate-700">
-              <!-- Industry -->
-              <span class="flex items-center gap-1.5">
-                <Building2 class="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                <span>{{ company.industry || 'Software & IT Services' }}</span>
-              </span>
-
-              <!-- Location -->
-              <span class="flex items-center gap-1.5">
-                <MapPin class="h-3.5 w-3.5 text-rose-500 shrink-0" />
-                <span>{{ company.location || 'Pune, Maharashtra, India' }}</span>
-              </span>
-
-              <!-- Employees -->
-              <span class="flex items-center gap-1.5">
-                <Users class="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                <span>{{ company.size || '11-50 employees' }}</span>
-              </span>
-
-              <!-- Est. Year -->
-              <span class="flex items-center gap-1.5">
-                <CalendarDays class="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                <span>Est. {{ company.foundedYear || '2026' }}</span>
-              </span>
-            </div>
-          </div>
-
-          <!-- =================================================
-               DASHBOARD TABS (Joined directly into Hero Card)
-          ================================================= -->
-          <div class="border-t border-slate-200 bg-white px-3 sm:px-5 py-1">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-
-              <div class="flex flex-wrap items-center gap-2">
-                <button
-                  v-for="tab in dashboardTabs"
-                  :key="tab.id"
-                  type="button"
-                  @click="selectDashboardTab(tab)"
-                  class="flex items-center gap-2 border-b-2 px-3 py-2 text-xs font-semibold transition cursor-pointer"
-                  :class="
-                    activeDashboardTab === tab.id
-                      ? 'border-[#4338CA] text-[#4338CA]'
-                      : 'border-transparent text-slate-600 hover:border-slate-300 hover:text-slate-900'
-                  "
-                >
-                  <component
-                    :is="tab.icon"
-                    class="h-4 w-4"
-                    :class="
-                      activeDashboardTab === tab.id
-                        ? 'text-[#4338CA]'
-                        : 'text-slate-400'
-                    "
-                  />
-
-                  <span>{{ tab.label }}</span>
-                </button>
-              </div>
-
-              <button
-                type="button"
-                class="flex shrink-0 items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-600 cursor-pointer"
+          <!-- Banner Content -->
+          <div
+            class="relative z-10 flex w-full flex-col lg:flex-row items-start lg:items-center justify-between gap-6 px-6 py-5 sm:px-8"
+          >
+            <!-- LEFT: Brand Logo & Information -->
+            <div class="flex items-center gap-4 sm:gap-6">
+              <!-- Large White Logo Box -->
+              <div
+                class="flex h-20 w-20 sm:h-24 sm:w-24 shrink-0 items-center justify-center rounded-2xl bg-white p-2.5 shadow-xl ring-1 ring-black/5 select-none"
               >
-                <Building2 class="h-3.5 w-3.5" />
-                <span>Switch / Accounts (1)</span>
-              </button>
+                <span
+                  class="text-3xl sm:text-4xl font-black tracking-tighter bg-gradient-to-br from-[#2563EB] via-indigo-600 to-violet-600 bg-clip-text text-transparent"
+                >
+                  WA
+                </span>
+              </div>
 
+              <!-- Company Details -->
+              <div class="flex flex-col gap-1">
+                <!-- Company Name + Verified Badge -->
+                <div class="flex items-center gap-2">
+                  <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+                    {{ company.name || 'WebArtifacts' }}
+                  </h1>
+                  <!-- Blue Verified Badge -->
+                  <span
+                    class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white shadow-xs"
+                    title="Verified Employer"
+                  >
+                    <Check class="h-3 w-3 stroke-[3]" />
+                  </span>
+                </div>
+
+                <!-- Tagline -->
+                <p class="text-xs sm:text-sm font-medium text-slate-200/90 leading-snug">
+                  {{ company.tagline || 'Building modern digital experiences' }}
+                </p>
+
+                <!-- Metadata Row -->
+                <div
+                  class="mt-1 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs font-medium text-slate-200/80"
+                >
+                  <!-- Website -->
+                  <a
+                    :href="company.website || 'https://www.webartifacts.com'"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center gap-1.5 hover:text-white transition"
+                  >
+                    <Globe class="h-3.5 w-3.5 text-slate-300 shrink-0" />
+                    <span>{{ company.websiteDisplay || 'www.webartifacts.com' }}</span>
+                  </a>
+
+                  <!-- Location -->
+                  <span class="flex items-center gap-1.5">
+                    <MapPin class="h-3.5 w-3.5 text-slate-300 shrink-0" />
+                    <span>{{ company.location || 'Pune, Maharashtra, India' }}</span>
+                  </span>
+
+                  <!-- Company Size -->
+                  <span class="flex items-center gap-1.5">
+                    <Users class="h-3.5 w-3.5 text-slate-300 shrink-0" />
+                    <span>{{ company.size || '11-50 employees' }}</span>
+                  </span>
+
+                  <!-- Founded Year -->
+                  <span class="flex items-center gap-1.5">
+                    <Calendar class="h-3.5 w-3.5 text-slate-300 shrink-0" />
+                    <span>Est. {{ company.foundedYear || '2026' }}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT: Inspiring Brand Slogan / Mantra Typography -->
+            <div class="hidden lg:flex flex-col items-start pr-6 select-none">
+              <div class="text-[#0f172a] font-black text-xl sm:text-2xl leading-[1.12] tracking-tight">
+                <div>Better</div>
+                <div>Technology</div>
+                <div>Brighter</div>
+                <div>Tomorrow</div>
+              </div>
+              <!-- Small Accent Bar -->
+              <div class="mt-2.5 h-1 w-10 rounded-full bg-[#2563EB]" />
             </div>
           </div>
-        </section>
+        </div>
+
+        <!-- STICKY SUB-NAVBAR TABS BAR (STOPS ON REACHING TOP, KEEPS FIXED THERE) -->
+        <div
+          v-if="showHeroCard && activeDashboardTab === 'Manage Business'"
+          class="sticky top-0 z-30 shrink-0 flex items-center gap-1 sm:gap-6 overflow-x-auto rounded-b-lg border-x border-b border-t border-slate-200/80 bg-white shadow-xs px-4 sm:px-6 py-1 scrollbar-none mb-2"
+          style="scrollbar-width: none; -ms-overflow-style: none;"
+        >
+          <button
+            v-for="tab in heroTabs"
+            :key="tab.id"
+            type="button"
+            @click="selectHeroTab(tab.id)"
+            class="group flex shrink-0 items-center gap-2 border-b-2 py-2 px-2 text-xs font-semibold transition cursor-pointer"
+            :class="
+              activeHeroTab === tab.id
+                ? 'border-violet-600 text-violet-600'
+                : 'border-transparent text-slate-600 hover:border-slate-300 hover:text-slate-900'
+            "
+          >
+            <component
+              :is="tab.icon"
+              class="h-4 w-4 transition"
+              :class="activeHeroTab === tab.id ? 'text-violet-600' : 'text-slate-400 group-hover:text-slate-600'"
+            />
+            <span>{{ tab.label }}</span>
+          </button>
+        </div>
+
 
       <div
         class="min-h-0 flex-1"
-        :class="['Manage Profile', 'Create Job'].includes(activeDashboardTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto pr-1 scrollbar-hide'"
+        :class="activeDashboardTab === 'Create Job' ? 'overflow-hidden flex flex-col h-full' : 'flex flex-col'"
       >
 
 <!-- =================================================
@@ -666,7 +728,7 @@ function handleProfileRemoved() {
 ================================================= -->
 
 <!-- Create Job -->
-<div v-if="activeDashboardTab === 'Create Job'" class="h-full min-h-0 flex-1 flex flex-col mt-2">
+<div v-if="activeDashboardTab === 'Create Job'" class="h-full min-h-0 flex-1 flex flex-col mt-0">
   <CreateJob
     @back="activeDashboardTab = 'Manage Jobs'"
     @cancel="activeDashboardTab = 'Manage Jobs'"
@@ -680,7 +742,7 @@ function handleProfileRemoved() {
 />
 
 <!-- Manage Profile -->
-<div v-else-if="activeDashboardTab === 'Manage Profile'" class="h-full min-h-0 flex-1 flex flex-col mt-2">
+<div v-else-if="activeDashboardTab === 'Manage Profile'" class="flex flex-col pb-0">
   <ManageProfile
     :initial-data="{
       name: company.name,
@@ -696,7 +758,7 @@ function handleProfileRemoved() {
 </div>
 
 <!-- Post Section (Announcements & Feed) -->
-<div v-else-if="activeDashboardTab === 'Post'" class="mt-3 flex flex-col gap-4 pb-8">
+<div v-else-if="activeDashboardTab === 'Post'" class="mt-0 flex flex-col gap-4 pb-8">
   <!-- Feed Header -->
   <div class="flex items-center justify-between px-1">
     <h3 class="text-sm font-bold text-slate-800">
@@ -821,7 +883,7 @@ function handleProfileRemoved() {
 
         <section
           v-if="activeDashboardTab === 'Manage Jobs'"
-          class="mt-3 flex min-h-[435px] flex-col rounded-lg border border-slate-200 bg-white shadow-xs overflow-hidden"
+          class="mt-0 flex min-h-[435px] flex-col rounded-lg border border-slate-200 bg-white shadow-xs overflow-hidden"
         >
 
           <!-- SEARCH / FILTER BAR HEADER -->
@@ -1051,11 +1113,12 @@ function handleProfileRemoved() {
 
             </table>
           </div>
-
         </section>
 
         </div>
       </main>
+
+    </div>
 
     <!-- CREATE POST MODAL POPUP -->
     <CreatePostModal

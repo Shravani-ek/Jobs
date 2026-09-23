@@ -124,7 +124,7 @@ function handleSubmit() {
 
 <template>
   <div class="flex h-full min-h-0 w-full flex-1 overflow-hidden">
-    <div class="grid h-full min-h-0 w-full grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_360px]">
+    <div class="grid h-full min-h-0 w-full grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_360px]">
 
       <!-- =========================================
            LEFT : REVIEW REGISTRATION
